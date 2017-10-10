@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+
+    <head>
+        <!--Import Google Icon Font-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!--Import materialize.css-->
+        <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css"  media="screen,projection"/>
+
+        <!--Let browser know website is optimized for mobile-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+
+    <body>
+    <!--Import jQuery before materialize.js-->
+        <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+        <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+        <script type="text/javascript" src="js/config.js"></script>
+    <!-- start -->
+    <style>
+        html{
+            background-color: #F7F7F7;
+        }
+        .reg{
+            padding-top: 8%;
+        }
+        .btn{
+            margin-left: 35%;
+        }
+    </style>
+
+
+    <script>
+        function submitReg(){
+            let regForm = $('form').serializeArray();
+//            console.log(regForm);
+//            if (regForm[0].value.length < 1){
+//                Materialize.toast("请输入邀请码", 2000);
+//                return false;
+//            }
+//            if (regForm[1].value.length < 1){
+//                Materialize.toast("请输入用户名", 2000);
+//                return false;
+//            }
+//            if (regForm[2].value.length < 1){
+//                Materialize.toast("请输入昵称", 2000);
+//                return  false;
+//            }
+//            if (regForm[3].value.length < 1){
+//                Materialize.toast("请输入密码", 2000);
+//                return false;
+//            }
+            $.ajax({
+                type: "POST",
+                url: regUrl,
+                data: $('form').serialize(),
+                success: function (response) {
+                    response = JSON.parse(response);
+                    console.log(response);
+                    if(response.accepted){
+                        Materialize.toast("注册成功，请登录", 2000);
+                        setTimeout(function () {
+                            window.location.href='/login.html';
+                        }, 100)
+                    } else {
+                        Materialize.toast(response.errMessage, 4000)
+                    }
+
+                },
+                error: {}
+            });
+        }
+    </script>
+    <div class="container">
+        <div class="reg">
+            <h4 class="head center">欢迎注册弹幕系统</h4>
+        </div>
+        <div class="row">
+            <form class="col s12" id="reg">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="regCode" type="text" class="validate" name="regCode">
+                        <label for="regCode">邀请码</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="username" type="text" class="validate" name="username">
+                        <label for="username">用户名</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="nickname" type="text" class="validate" name="nickname">
+                        <label for="nickname">昵称</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="password" type="password" class="validate" name="password">
+                        <label for="password">密码</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <a class="waves-effect waves-light btn" onclick="submitReg()">注册</a>
+    </div>
+
+
+    <!-- end   -->
+
+    </body>
+</html>

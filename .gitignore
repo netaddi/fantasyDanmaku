@@ -12,3 +12,20 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+
+.DS_Store
+
+
+# database config file
+backend/config/db.go
+src/danmakuBackend/config/config.json
+src/danmakuBackend/danmakuBackend
+./src/danmakuBackend/config/*
+
+# emacs temp file
+*~
+
+# github golang libe
+src/github.com
+
+.idea/
