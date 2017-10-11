@@ -9,16 +9,10 @@ import (
 	//"database/sql/driver"
 )
 
-//func respondError(w http.ResponseWriter, errMessage string)  {
-//	io.WriteString()
-//}
-
 func RegHandler(w http.ResponseWriter, r *http.Request){
 	r.ParseForm()
 	LogHTTPRequest(r)
 
-
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 
 	for _, v := range r.Form {
 		if len(v[0]) < 1 {

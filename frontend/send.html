@@ -33,10 +33,10 @@
 
 <script>
     function submitReg(){
-        let regForm = $('form').serializeArray();
+
         $.ajax({
             type: "POST",
-            url: loginUrl,
+            url: sendUrl,
             data: $('form').serialize(),
             success: function (response) {
                 response = JSON.parse(response);
@@ -58,25 +58,25 @@
 </script>
 <div class="container">
     <div class="reg">
-        <h4 class="head center">登录弹幕系统</h4>
+        <h4 class="head center">发射弹幕！</h4>
     </div>
     <div class="row">
         <form class="col s12" id="reg">
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="username" type="text" class="validate" name="username">
-                    <label for="username">用户名</label>
+                    <input id="text" type="text" class="validate" name="username">
+                    <label for="text">弹幕内容</label>
                 </div>
             </div>
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" type="password" class="validate" name="password">
-                    <label for="password">密码</label>
+                    <input id="color" type="text" class="validate" name="username" value="#FFFFFF">
+                    <label for="color">颜色</label>
                 </div>
             </div>
         </form>
     </div>
-    <a class="waves-effect waves-light btn" onclick="submitReg()">登录</a>
+    <a class="waves-effect waves-light btn" onclick="submitReg()">发射！</a>
 </div>
 
 

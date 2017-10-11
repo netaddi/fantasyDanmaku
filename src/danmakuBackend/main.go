@@ -21,7 +21,6 @@ func main() {
 	// router
 	r.HandleFunc("/reg", lib.RegHandler)
 	r.HandleFunc("/login", lib.LoginHandler)
-	//r.PathPrefix("/").Handler(http.FileServer(http.Dir("./frontend/")))
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))
 
