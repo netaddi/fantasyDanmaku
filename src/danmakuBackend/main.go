@@ -11,16 +11,23 @@ import (
 	//"github.com/gorilla/handlers"
 	"net/http"
 	"strconv"
+	//"encoding/gob"
 )
+
+type lastTimestamp int64
 
 func main() {
 
 	config := lib.GetConfig()
 	r := mux.NewRouter()
 
+	//gob.Register(lastTimestamp(0))
+
 	// router
 	r.HandleFunc("/reg", lib.RegHandler)
 	r.HandleFunc("/login", lib.LoginHandler)
+	r.HandleFunc("/send", lib.CommentHanbler)
+
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))
 

@@ -42,13 +42,10 @@
                 response = JSON.parse(response);
                 console.log(response);
                 if(response.accepted){
-                    Materialize.toast("登录成功", 4000);
-                    setTimeout(function () {
-                        window.location.href = '/send.html'
-                    }, 200)
+                    Materialize.toast("发送成功", 2000);
                     // jump to page to send danmaku
                 } else {
-                    Materialize.toast(response.errMessage, 4000)
+                    Materialize.toast(response.errMessage, 2000)
                 }
 
             },
@@ -64,13 +61,13 @@
         <form class="col s12" id="reg">
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="text" type="text" class="validate" name="username">
+                    <input id="text" type="text" class="validate" name="text">
                     <label for="text">弹幕内容</label>
                 </div>
             </div>
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="color" type="text" class="validate" name="username" value="#FFFFFF">
+                    <input id="color" type="text" class="validate" name="color" value="#FFFFFF">
                     <label for="color">颜色</label>
                 </div>
             </div>
