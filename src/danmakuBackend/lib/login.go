@@ -19,7 +19,6 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 	for _, v := range r.Form {
 		if len(v[0]) < 1 {
 			denyRequest(w, "请填写所有字段")
-			//io.WriteString(w, "{\"accepted\": 0, \"errMessage\": \"请填写所有字段\"}")
 			return
 		}
 	}
@@ -29,7 +28,6 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 	if err != nil {
 		println("failed to connect database.")
 		denyRequest(w, "failed to connect database.")
-		//io.WriteString(w, "{\"accepted\": 0, \"errMessage\": \"failed to connect database.\"}")
 		db.Close()
 		return
 	}
@@ -41,7 +39,6 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 	if err != nil {
 		println("failed to query database.: ", err.Error())
 		denyRequest(w, "failed to query database.")
-		//io.WriteString(w, "{\"accepted\": 0, \"errMessage\": \"failed to query database.\"}")
 		db.Close()
 		return
 	}
