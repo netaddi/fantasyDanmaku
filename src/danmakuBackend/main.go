@@ -27,6 +27,7 @@ func main() {
 	r.HandleFunc("/reg", lib.RegHandler)
 	r.HandleFunc("/login", lib.LoginHandler)
 	r.HandleFunc("/send", lib.CommentHanbler)
+	r.HandleFunc("/socket", lib.handleSocket)
 
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))
