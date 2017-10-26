@@ -14,11 +14,17 @@ var upgrader = websocket.Upgrader{
 //	conn, err := upgrader.Upgrade()
 //}
 
-func handleSocket(w http.ResponseWriter, r * http.Request){
+func HandleSocket(w http.ResponseWriter, r * http.Request){
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		println("websocket error: ", err)
 		return
 	}
+	//defer conn.Close()
+
+	wsWriter, err := conn.NextWriter(websocket.TextMessage)
+	wsWriter.Write([]byte("test string \n"))
+
+	//conn.WriteMessage(websocket.CloseMessage, []byte{})
 	return
 }
