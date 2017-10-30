@@ -10,21 +10,32 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-//func sendWebsoketMessage(message string){
-//	conn, err := upgrader.Upgrade()
-//}
+
+type FrontStruct struct {
+	available bool
+	conn *websocket.Conn
+}
+
+
+var Frontend = &FrontStruct{false, nil}
 
 func HandleSocket(w http.ResponseWriter, r * http.Request){
+	LogHTTPRequest(r)
 	conn, err := upgrader.Upgrade(w, r, nil)
+	configs := GetConfig()
 	if err != nil {
 		println("websocket error: ", err)
 		return
 	}
+	Frontend.conn = conn
+	Frontend.available = true
 	//defer conn.Close()
 
-	wsWriter, err := conn.NextWriter(websocket.TextMessage)
-	wsWriter.Write([]byte("test string \n"))
+	//wsWriter, err := conn.NextWriter(websocket.TextMessage)
+	//wsWriter.Write([]byte("test string \n"))
+	//wsWriter.Close()
 
-	//conn.WriteMessage(websocket.CloseMessage, []byte{})
+	conn.WriteMessage(websocket.TextMessage, []byte(configs.WSToken))
+
 	return
 }

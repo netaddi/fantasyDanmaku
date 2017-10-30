@@ -16,6 +16,7 @@ type ConfigObject struct {
 	DBuser string
 	DBpassword string
 	DBsource string
+	WSToken string
 }
 // external accessible function / var have to start with uppercase letter.
 

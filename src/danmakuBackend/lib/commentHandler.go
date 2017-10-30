@@ -7,6 +7,7 @@ import (
 	"time"
 	"database/sql"
 	//"go/token"
+	"github.com/gorilla/websocket"
 )
 
 func CommentHanbler(w http.ResponseWriter, r * http.Request){
@@ -37,7 +38,9 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 
 	username := session.Values["user"]
 	comment := r.Form.Get("text")
-	color := "FFFFFF"
+	color := r.Form.Get("color")
+
+	danmakuItem := &DanmakuContent{comment, color, DefaultSize, DefaultType}
 
 	config := GetConfig()
 	db, err := sql.Open("mysql", config.DBsource)
@@ -65,6 +68,9 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 		denyRequest(w, "database error. ")
 	}
 	if affect == 1{
+		if Frontend.available {
+			Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.getJSON()))
+		}
 		acceptRequest(w)
 	} else {
 		denyRequest(w, "数据库写入失败")

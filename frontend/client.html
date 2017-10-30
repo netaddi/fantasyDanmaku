@@ -5,6 +5,7 @@
     <title>Title</title>
 </head>
 <body>
+    <script type="text/javascript" src="js/config.js"></script>
     <script>
         var conn;
         var msg = document.getElementById("msg");
@@ -28,7 +29,7 @@
                 }
             }
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn = new WebSocket(config.wsUrl);
                 conn.onclose = function (evt) {
                     var item = document.createElement("div");
                     item.innerHTML = "<b>Connection closed.</b>";
