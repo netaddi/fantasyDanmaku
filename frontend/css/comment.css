@@ -1,0 +1,11 @@
+@keyframes commentAnimation{
+    0% {font-size: 32px}
+    100% {font-size: 64px}
+}
+
+.danmaku{
+    font-size: 64px;
+    -webkit-animation: 1s commentAnimation;
+    -o-animation: 1s commentAnimation;
+    animation: 1s commentAnimation;
+}

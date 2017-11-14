@@ -3,54 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link href="/css/comment.css" rel="stylesheet">
+    <style>
+        .comment{
+            position: absolute;
+        }
+        #log{
+            font-family: "Menlo", "sans-serif";
+        }
+    </style>
 </head>
 <body>
+
     <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/danmaku.js"></script>
     <script>
-        var conn;
-        var msg = document.getElementById("msg");
-        var log = document.getElementById("log");
-        function appendLog(item) {
-            var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-            log.appendChild(item);
-            if (doScroll) {
-                log.scrollTop = log.scrollHeight - log.clientHeight;
-            }
-        }
         window.onload = function () {
             var conn;
             var msg = document.getElementById("msg");
             var log = document.getElementById("log");
-            function appendLog(item) {
-                var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+            function printLog(message) {
+                var item = document.createElement("div");
+                item.innerHTML = message;
                 log.appendChild(item);
-                if (doScroll) {
-                    log.scrollTop = log.scrollHeight - log.clientHeight;
-                }
             }
             if (window["WebSocket"]) {
                 conn = new WebSocket(config.wsUrl);
                 conn.onclose = function (evt) {
-                    var item = document.createElement("div");
-                    item.innerHTML = "<b>Connection closed.</b>";
-                    appendLog(item);
+                    printLog("connection closed.")
                 };
                 conn.onmessage = function (evt) {
-                    var messages = evt.data.split('\n');
-                    for (var i = 0; i < messages.length; i++) {
-                        var item = document.createElement("div");
-                        item.innerText = messages[i];
-                        appendLog(item);
+                    var message = evt.data;
+                    printLog(message);
+                    if (message === wsToken){
+                        connected = true;
+                        return;
                     }
+                    var jsonMessage = JSON.parse(message);
+                    generateDanmaku(jsonMessage);
                 };
             } else {
-                var item = document.createElement("div");
-                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-                appendLog(item);
+                printLog("<b>Your browser does not support WebSockets.</b>");
             }
         };
     </script>
     <div id="msg"></div>
     <div id="log"></div>
+    <div id="danmaku"></div>
 </body>
 </html>

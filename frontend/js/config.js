@@ -1,11 +1,13 @@
-let server = '127.0.0.1';
-let port = '8081';
+const server = '127.0.0.1';
+const port = '8081';
 
-let wsUrl = 'ws://' + server + ':' + port + '/ws';
-let regUrl = '//' +  server + ':' + port + '/reg';
-let loginUrl = '//' +  server + ':' + port + '/login';
-let sendUrl = '//' +  server + ':' + port + '/send';
+const wsUrl = 'ws://' + server + ':' + port + '/ws';
+const regUrl = '//' +  server + ':' + port + '/reg';
+const loginUrl = '//' +  server + ':' + port + '/login';
+const sendUrl = '//' +  server + ':' + port + '/send';
 
-let config = {server : server,
+const config = {server : server,
                 port : port,
                 wsUrl : wsUrl};
+
+const wsToken = '__Danmaku_WS_Connected_Token___';
