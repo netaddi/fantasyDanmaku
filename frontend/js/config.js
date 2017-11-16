@@ -11,3 +11,7 @@ const config = {server : server,
                 wsUrl : wsUrl};
 
 const wsToken = '__Danmaku_WS_Connected_Token___';
+const speed = 1;
+const defaultSize = 32;
+
+const danmakuLineContiueThreshold = 100;

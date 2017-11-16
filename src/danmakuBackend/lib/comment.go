@@ -12,7 +12,7 @@ type DanmakuContent struct {
 	CommentType string
 }
 
-var DefaultSize = 12
+var DefaultSize = 36
 var DefaultType = "normal"
 
 func (this DanmakuContent) getJSON () string{

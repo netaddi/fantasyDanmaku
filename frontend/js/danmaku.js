@@ -1,15 +1,37 @@
 // danmaku object type:
 // text:
 const danmakuDivId = 'danmaku';
+
+class danmakuRails{
+    constructor(){
+        this.rails = [[]]
+    }
+    addDanmaku(danmaku){
+
+    }
+}
+
+function moveDanmaku(danmakuItem){
+    var totalLength = window.innerWidth + danmakuItem.offsetWidth;
+    var movedLength = 0;
+    var timer = setInterval(function () {
+        movedLength += speed;
+        danmakuItem.style.transform = 'translateX(-' + movedLength + 'px)';
+        if(movedLength > totalLength){
+            clearInterval(timer);
+            danmakuItem.remove();
+        }
+    }, 10);
+
+}
+
 function generateDanmaku(jsonMessage) {
     var danmakuDiv = document.getElementById(danmakuDivId);
     var newHTMLNode = document.createElement("div");
     newHTMLNode.classList.add("comment");
     newHTMLNode.innerHTML = jsonMessage['Text'];
-    newHTMLNode.style.fontSize = jsonMessage['Size'];
     newHTMLNode.style.color = jsonMessage['Color'];
-    newHTMLNode.style.fontFamily = '"Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","WenQuanYi Micro Hei","Microsoft Yahei",sans-serif';
-    newHTMLNode.style.left = 330;
-
+    newHTMLNode.style.left = innerWidth + 'px';
     danmakuDiv.appendChild(newHTMLNode);
+    moveDanmaku(newHTMLNode);
 }
