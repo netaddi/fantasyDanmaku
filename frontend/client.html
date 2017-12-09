@@ -14,6 +14,7 @@
             top:  0;
         }
         .comment{
+            opacity: 0.85;
             position: absolute;
             white-space: nowrap;
             text-shadow: 2px 2px 4px #000;
@@ -23,18 +24,43 @@
         #log{
             color: #FFF;
             font-family: "Menlo", "sans-serif";
+            /*display: none;*/
+        }
+        #impress{
+            font-size: 64px;
+            color: #FFD;
+        }
+        img{
+            width: 60px;
+            /*height: auto;*/
+            /*max-width: 100%;*/
+            /*display: block;*/
         }
     </style>
 </head>
 <body>
 
+
+
+    <div id="show">
+        <div id="impress">
+        </div>
+    </div>
+    <div id="log"></div>
+    <div id="danmaku"></div>
+
     <script type="text/javascript" src="js/config.js"></script>
     <script type="text/javascript" src="js/danmaku.js"></script>
+    <script type="text/javascript" src="js/showList.js"></script>
+    <script type="text/javascript" src="js/impress.js"></script>
+
     <script>
+        frontInit();
         window.onload = function () {
             var conn;
             var msg = document.getElementById("msg");
             var log = document.getElementById("log");
+            impress().init();
             function printLog(message) {
                 var item = document.createElement("div");
                 item.innerHTML = message;
@@ -60,8 +86,7 @@
             }
         };
     </script>
-    <div id="msg"></div>
-    <div id="log"></div>
-    <div id="danmaku"></div>
+    <script>
+    </script>
 </body>
 </html>

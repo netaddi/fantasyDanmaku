@@ -29,3 +29,9 @@ src/danmakuBackend/danmakuBackend
 src/github.com
 
 .idea/
+
+frontend/images/
+
+*.flv
+*.jpg
+*.mp4
