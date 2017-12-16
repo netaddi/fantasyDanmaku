@@ -1,4 +1,4 @@
-package lib
+package danmakuLib
 
 import (
 	//"encoding/json"

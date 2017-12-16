@@ -1,52 +1,56 @@
-package lib
+package requestProcessors
 
 import (
 	"net/http"
-	//"github.com/gorilla/sessions"
-	//"github.com/gorilla/sessions"
 	"time"
 	"database/sql"
-	//"go/token"
 	"github.com/gorilla/websocket"
+	"fmt"
+	"danmakuBackend/danmakuLib"
 )
 
 func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	r.ParseForm()
-	LogHTTPRequest(r)
-	session := getSession(r, w)
+	danmakuLib.LogHTTPRequest(r)
+	session := danmakuLib.GetSession(r, w)
 
 
 
 	lastTime, _ := session.Values["lastTimestamp"].(int64)
 	if lastTime == 0 {
-		denyRequest(w, "请先登录再发送")
+		danmakuLib.DenyRequest(w, "请先登录再发送<a href=\\\"login.html\\\">点我登陆</a>")
 		return
 	}
 	timeDifference := time.Now().Unix() - lastTime
+	fmt.Print(timeDifference)
 	if timeDifference < 2 {
-		denyRequest(w, "请2秒之后再发送！")
+		danmakuLib.DenyRequest(w, "请2秒之后再发送！")
 		return
 	}
+	session.Values["lastTimestamp"] = time.Now().Unix()
+	session.Save(r, w)
 
 	permission, _ := session.Values["permission"].(int)
 	if permission < 0{
-		denyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
+		danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
 		return
 	}
-
-
 
 	username := session.Values["user"]
 	comment := r.Form.Get("text")
 	color := r.Form.Get("color")
 
-	danmakuItem := &DanmakuContent{comment, color, DefaultSize, DefaultType}
+	danmakuItem := &danmakuLib.DanmakuContent{
+		comment,
+		color,
+		danmakuLib.DefaultSize,
+		danmakuLib.DefaultType}
 
-	config := GetConfig()
+	config := danmakuLib.GetConfig()
 	db, err := sql.Open("mysql", config.DBsource)
 	if err != nil {
 		println("failed to connect database.")
-		denyRequest(w, "failed to connect database.")
+		danmakuLib.DenyRequest(w, "failed to connect database.")
 		db.Close()
 		return
 	}
@@ -55,25 +59,25 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	defer stmt.Close()
 	if err != nil {
 		println("error: ", err.Error())
-		denyRequest(w, "database error. ")
+		danmakuLib.DenyRequest(w, "database error. ")
 	}
 	result, err := stmt.Exec(username, comment, color)
 	if err != nil {
 		println("error: ", err.Error())
-		denyRequest(w, "database error. ")
+		danmakuLib.DenyRequest(w, "database error. ")
 	}
 	affect, err := result.RowsAffected()
 	if err != nil {
 		println("error: ", err.Error())
-		denyRequest(w, "database error. ")
+		danmakuLib.DenyRequest(w, "database error. ")
 	}
 	if affect == 1{
 		if Frontend.available {
-			Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.getJSON()))
+			Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.GetJSON()))
 		}
-		acceptRequest(w)
+		danmakuLib.AcceptRequest(w)
 	} else {
-		denyRequest(w, "数据库写入失败")
+		danmakuLib.DenyRequest(w, "数据库写入失败")
 	}
 
 }

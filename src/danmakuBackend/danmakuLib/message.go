@@ -1,4 +1,4 @@
-package lib
+package danmakuLib
 
 import (
 	"net/http"
@@ -6,11 +6,11 @@ import (
 	"fmt"
 )
 
-func denyRequest(w http.ResponseWriter, msg string){
+func DenyRequest(w http.ResponseWriter, msg string) {
 	writeStr := fmt.Sprintf("{\"accepted\": 0, \"errMessage\": \"%s\"}", msg)
 	io.WriteString(w, writeStr)
 	return
 }
-func acceptRequest(w http.ResponseWriter)  {
+func AcceptRequest(w http.ResponseWriter) {
 	io.WriteString(w, "{\"accepted\": 1}")
 }

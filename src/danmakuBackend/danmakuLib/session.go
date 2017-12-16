@@ -1,4 +1,4 @@
-package lib
+package danmakuLib
 
 import (
 	"github.com/gorilla/sessions"
@@ -6,7 +6,7 @@ import (
 )
 
 var store = sessions.NewCookieStore([]byte("keyThatDoesNotMatter"))
-func getSession(r *http.Request,w http.ResponseWriter) *sessions.Session {
+func GetSession(r *http.Request,w http.ResponseWriter) *sessions.Session {
 	session, err := store.Get(r, "sessionID")
 	if err != nil {
 		panic(err)

@@ -9,3 +9,13 @@
     -o-animation: 1s commentAnimation;
     animation: 1s commentAnimation;
 }
+
+#impress #show{
+    z-index: 0;
+}
+#log{
+    z-index: 1;
+}
+#danmaku{
+    z-index: 10;
+}

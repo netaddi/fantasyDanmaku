@@ -33,28 +33,13 @@
 
     <script>
         function submitReg(){
-            let regForm = $('form').serializeArray();
-//            console.log(regForm);
-//            if (regForm[0].value.length < 1){
-//                Materialize.toast("请输入邀请码", 2000);
-//                return false;
-//            }
-//            if (regForm[1].value.length < 1){
-//                Materialize.toast("请输入用户名", 2000);
-//                return false;
-//            }
-//            if (regForm[2].value.length < 1){
-//                Materialize.toast("请输入昵称", 2000);
-//                return  false;
-//            }
-//            if (regForm[3].value.length < 1){
-//                Materialize.toast("请输入密码", 2000);
-//                return false;
-//            }
+            var form = $('form');
+            // var regForm = form.serializeArray();
+
             $.ajax({
                 type: "POST",
                 url: regUrl,
-                data: $('form').serialize(),
+                data: form.serialize(),
                 success: function (response) {
                     response = JSON.parse(response);
                     console.log(response);
@@ -82,12 +67,6 @@
                     <div class="input-field col s12">
                         <input id="regCode" type="text" class="validate" name="regCode">
                         <label for="regCode">邀请码</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input id="username" type="text" class="validate" name="username">
-                        <label for="username">用户名</label>
                     </div>
                 </div>
                 <div class="row">

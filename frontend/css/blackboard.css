@@ -1,0 +1,49 @@
+#blackboard{
+    position: absolute;
+    top: 8%;
+    left: 8%;
+
+    width: 84%;
+    height: 0;
+    /*height: 84%;*/
+    border-radius: 40px;
+    z-index: 5;
+    background: #000;
+    opacity: 0.64;
+    box-shadow: 4px 4px 8px #000;
+    transition: 1.5s height cubic-bezier(0, 0.61, 0.33, 1.01);
+}
+#board{
+    padding-left: 40px;
+    padding-top: 40px;
+    display: none;
+    z-index: 15;
+    color: #fff;
+    text-shadow: 2px 2px 4px #000;
+    font-size: 48px;
+    font-family: "Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","WenQuanYi Micro Hei","Microsoft Yahei",sans-serif;
+}
+#lottery{
+    display: none;
+}
+h2{
+    text-align: center;
+}
+.btn{
+    position: relative;
+    display: inline-block;
+    font-size: 48px;
+    height: 16%;
+    line-height: 200%;
+    width: 20%;
+    left: 40%;
+    background-color: #fff;
+    color: #000;
+    border-radius: 10px;
+    text-shadow: none;
+    text-align: center;
+    transition: 0.2s;
+}
+.btn:hover{
+    background-color: #ddd;
+}

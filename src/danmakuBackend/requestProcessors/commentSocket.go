@@ -1,8 +1,9 @@
-package lib
+package requestProcessors
 
 import (
 	"github.com/gorilla/websocket"
 	"net/http"
+	"danmakuBackend/danmakuLib"
 )
 
 var upgrader = websocket.Upgrader{
@@ -20,20 +21,15 @@ type FrontStruct struct {
 var Frontend = &FrontStruct{false, nil}
 
 func HandleSocket(w http.ResponseWriter, r * http.Request){
-	LogHTTPRequest(r)
+	danmakuLib.LogHTTPRequest(r)
 	conn, err := upgrader.Upgrade(w, r, nil)
-	configs := GetConfig()
+	configs := danmakuLib.GetConfig()
 	if err != nil {
 		println("websocket error: ", err)
 		return
 	}
 	Frontend.conn = conn
 	Frontend.available = true
-	//defer conn.Close()
-
-	//wsWriter, err := conn.NextWriter(websocket.TextMessage)
-	//wsWriter.Write([]byte("test string \n"))
-	//wsWriter.Close()
 
 	conn.WriteMessage(websocket.TextMessage, []byte(configs.WSToken))
 

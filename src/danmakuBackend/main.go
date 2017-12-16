@@ -3,31 +3,27 @@ package main
 
 import (
 	"fmt"
-	//"os"
-	//"encoding/json"
-	"danmakuBackend/lib"
+	"danmakuBackend/danmakuLib"
+	"danmakuBackend/requestProcessors"
 	"github.com/gorilla/mux"
-	//"github.com/rs/cors"
-	//"github.com/gorilla/handlers"
 	"net/http"
 	"strconv"
-	//"encoding/gob"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type lastTimestamp int64
 
 func main() {
 
-	config := lib.GetConfig()
+	config := danmakuLib.GetConfig()
 	r := mux.NewRouter()
 
-	//gob.Register(lastTimestamp(0))
-
 	// router
-	r.HandleFunc("/reg", lib.RegHandler)
-	r.HandleFunc("/login", lib.LoginHandler)
-	r.HandleFunc("/send", lib.CommentHanbler)
-	r.HandleFunc("/ws", lib.HandleSocket)
+	r.HandleFunc("/reg", requestProcessors.RegHandler)
+	r.HandleFunc("/login", requestProcessors.LoginHandler)
+	r.HandleFunc("/send", requestProcessors.CommentHanbler)
+	r.HandleFunc("/ws", requestProcessors.HandleSocket)
+	r.HandleFunc("/getUserList", requestProcessors.GetUserList)
 
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))

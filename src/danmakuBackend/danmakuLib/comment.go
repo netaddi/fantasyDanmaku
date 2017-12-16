@@ -1,4 +1,4 @@
-package lib
+package danmakuLib
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ type DanmakuContent struct {
 var DefaultSize = 36
 var DefaultType = "normal"
 
-func (this DanmakuContent) getJSON () string{
+func (this DanmakuContent) GetJSON () string{
 	b, err := json.Marshal(this)
 	if err != nil {
 		fmt.Println("jsonize error ! \n")
