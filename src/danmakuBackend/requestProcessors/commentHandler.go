@@ -14,7 +14,7 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	danmakuLib.LogHTTPRequest(r)
 	session := danmakuLib.GetSession(r, w)
 
-
+	
 
 	lastTime, _ := session.Values["lastTimestamp"].(int64)
 	if lastTime == 0 {
@@ -30,8 +30,12 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	session.Values["lastTimestamp"] = time.Now().Unix()
 	session.Save(r, w)
 
-	permission, _ := session.Values["permission"].(int)
-	if permission < 0{
+	//permission, _ := session.Values["permission"].(int)
+	//if permission < 0{
+	//	danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
+	//	return
+	//}
+	if danmakuLib.QueryPermission(session.Values["user"].(string)) < 1 {
 		danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
 		return
 	}

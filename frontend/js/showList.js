@@ -1,4 +1,4 @@
-var showList = [
+const showList = [
     {
         "title" : "test performance 1",
         "file" : "images/pic1.jpg"

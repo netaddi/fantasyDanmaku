@@ -62,9 +62,13 @@ function generateDanmaku(message) {
 
     newHTMLNode.classList.add("comment");
     newHTMLNode.innerHTML = jsonMessage['Text'];
-    newHTMLNode.style.color = jsonMessage['Color'];
     newHTMLNode.style.left = innerWidth + 'px';
     newHTMLNode.style.fontSize = defaultSize + 'px';
+    if (/#[0-9a-fA-F]{6}/.test(jsonMessage['Color'])){
+        newHTMLNode.style.color = jsonMessage['Color'];
+    } else {
+        newHTMLNode.style.color = '#FFFFFF';
+    }
 
     var thisRail = pushIntoRail();
     newHTMLNode.style.top = defaultSize * thisRail + 'px';

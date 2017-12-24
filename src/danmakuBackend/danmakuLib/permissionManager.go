@@ -8,7 +8,11 @@ import (
 
 var permissionMap map[string]int
 
-func queryPermission(userId string) int {
+func QueryPermission(userId string) int {
+	if permissionMap == nil{
+		permissionMap = make(map[string]int)
+	}
+
 	permission, userFound := permissionMap[userId];
 	if userFound {
 		return permission
@@ -35,7 +39,11 @@ func queryPermission(userId string) int {
 	return -1
 }
 
-func setPermission(userId string, permission int) bool {
+func SetPermission(userId string, permission int) bool {
+	if permissionMap == nil{
+		permissionMap = make(map[string]int)
+	}
+
 	permissionMap[userId] = permission
 
 	config := GetConfig()
