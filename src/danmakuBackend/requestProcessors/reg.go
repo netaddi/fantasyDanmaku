@@ -29,12 +29,13 @@ func RegHandler(w http.ResponseWriter, r *http.Request){
 		db.Close()
 		return
 	}
+	defer db.Close()
 
 	rows, err := db.Query("SELECT * FROM users WHERE reg_code=\"" + r.Form.Get("regCode") + "\" AND enrolled=FALSE")
 	if err != nil {
 		println("failed to query database.: ", err.Error())
 		danmakuLib.DenyRequest(w, "failed to query database")
-		db.Close()
+		//db.Close()
 		return
 	}
 
@@ -63,6 +64,6 @@ func RegHandler(w http.ResponseWriter, r *http.Request){
 	} else {
 		danmakuLib.DenyRequest(w, "邀请码不存在或已注册")
 	}
-	db.Close()
+	//db.Close()
 
 }

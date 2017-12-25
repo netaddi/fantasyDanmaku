@@ -21,7 +21,7 @@ func main() {
 	// router
 	r.HandleFunc("/reg", requestProcessors.RegHandler)
 	r.HandleFunc("/login", requestProcessors.LoginHandler)
-	r.HandleFunc("/send", requestProcessors.CommentHanbler)
+	r.HandleFunc("/send", requestProcessors.CommentHandler)
 	r.HandleFunc("/ws", requestProcessors.HandleSocket)
 	r.HandleFunc("/getUserList", requestProcessors.GetUserList)
 

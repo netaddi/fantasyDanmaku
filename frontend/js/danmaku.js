@@ -4,10 +4,61 @@ const logDivId = 'log';
 const logDiv = document.getElementById(logDivId);
 // const log = document.getElementById("log");
 
-var windowWidth = window.innerWidth;
-var connected;
+const windowWidth = window.innerWidth;
+let connected;
 // rails for danmaku.
-var rails = [0];
+// let rails = [0];
+
+
+class KeywordFilter{
+    constructor() {
+        this.bannedKeywordList = [];
+    }
+
+    addBannedKeyword(keyword) {
+        this.bannedKeywordList.push(keyword)
+    }
+
+    checkCommentBanned(comment) {
+        return this.bannedKeywordList.reduce(function (previousValue, thisKeyword) {
+            return comment.indexOf(thisKeyword) > -1 || previousValue
+        }, false)
+    }
+}
+
+class DanmakuRail{
+    constructor() {
+        this.rails = [0];
+    }
+
+    pushIntoRail(){
+        let i = 0;
+        for (; i < this.rails.length; i++){
+            if (!this.rails[i]){
+                this.rails[i] = 1;
+                return i;
+            }
+        }
+        this.rails.push(1);
+        return i;
+    }
+
+    releaseRail(rail) {
+        this.rails[rail] = 0;
+    }
+
+}
+
+
+let rails = new DanmakuRail();
+let keywordFilter = new KeywordFilter();
+
+
+function processAdminCommand(operation, parameter) {
+    switch (operation) {
+        case "banKeyword" :keywordFilter.addBannedKeyword(parameter);
+    }
+}
 
 function processWSMessage(message){
     printLog(message);
@@ -15,37 +66,27 @@ function processWSMessage(message){
         connected = true;
         return;
     }
-    generateDanmaku(message);
-}
-
-function pushIntoRail(){
-    var i = 0;
-    for (; i < rails.length; i++){
-        if (!rails[i]){
-            rails[i] = 1;
-            return i;
-        }
+    let jsonMessage = JSON.parse(message);
+    if(jsonMessage.IsAdminCommand){
+        processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
+        return
     }
-    rails.push(1);
-    return i;
-}
-
-function releaseRail(rail) {
-    rails[rail] = 0;
+    generateDanmaku(jsonMessage);
 }
 
 function moveDanmaku(danmakuItem, rail){
     const freeLength = window.innerWidth / 10 ;
     const totalLength = window.innerWidth + danmakuItem.offsetWidth;
-    var freeRailMoveLength = danmakuItem.offsetWidth + freeLength;
-    var movedLength = 0;
-    var railFreed = false;
-    var timer = setInterval(function () {
+    let freeRailMoveLength = danmakuItem.offsetWidth + freeLength;
+    let movedLength = 0;
+    let railFreed = false;
+    let timer = setInterval(function () {
         movedLength += speed;
         danmakuItem.style.transform = 'translateX(-' + movedLength + 'px)';
         if(!railFreed && movedLength > freeRailMoveLength){
             railFreed = true;
-            releaseRail(rail);
+            // releaseRail(rail);
+            rails.releaseRail(rail)
         }
         if(movedLength > totalLength){
             clearInterval(timer);
@@ -55,10 +96,13 @@ function moveDanmaku(danmakuItem, rail){
 
 }
 
-function generateDanmaku(message) {
-    var jsonMessage = JSON.parse(message);
-    var danmakuDiv = document.getElementById(danmakuDivId);
-    var newHTMLNode = document.createElement("div");
+function generateDanmaku(jsonMessage) {
+    let danmakuDiv = document.getElementById(danmakuDivId);
+    let newHTMLNode = document.createElement("div");
+
+    if (keywordFilter.checkCommentBanned(jsonMessage['Text'])) {
+        return;
+    }
 
     newHTMLNode.classList.add("comment");
     newHTMLNode.innerHTML = jsonMessage['Text'];
@@ -70,7 +114,8 @@ function generateDanmaku(message) {
         newHTMLNode.style.color = '#FFFFFF';
     }
 
-    var thisRail = pushIntoRail();
+    // let thisRail = pushIntoRail();
+    let thisRail = rails.pushIntoRail();
     newHTMLNode.style.top = defaultSize * thisRail + 'px';
     danmakuDiv.appendChild(newHTMLNode);
     moveDanmaku(newHTMLNode, thisRail);
@@ -85,26 +130,25 @@ function objectMap(obj, call){
 }
 
 function generateSlides() {
-    var xStep = windowWidth;
-    var yStep = windowWidth;
-    var zStep = 100;
-    var x = 0;
-    var y = 0;
-    var z = 0;
-    var impressDiv = document.getElementById('impress');
+    let xStep = windowWidth;
+    let yStep = windowWidth;
+    let zStep = 100;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    let impressDiv = document.getElementById('impress');
 
     showList.map(
         function(el){
-            var fileType = el.file.match(/\..+$/)[0];
-            var divHtml;
-            var showDiv = document.createElement('div');
+            let fileType = el.file.match(/\..+$/)[0];
+            let showDiv = document.createElement('div');
             showDiv.setAttribute('class', 'step slide');
             showDiv.setAttribute('data-x', x.toString());
             showDiv.setAttribute('data-y', y.toString());
             showDiv.setAttribute('data-z', z.toString());
             impressDiv.appendChild(showDiv);
-            if (['.jpg', '.png', '.gif'].indexOf(fileType) > -1){
-                var imgDiv = document.createElement('img');
+            if (1){
+                let imgDiv = document.createElement('img');
                 imgDiv.setAttribute('src', el.file);
                 showDiv.appendChild(imgDiv);
                 // divHtml = '<div class="step slide" data-x="' + x + '" data-y="' + y + '" data-z="' + z + '">\n' +
@@ -112,9 +156,9 @@ function generateSlides() {
                 //     '</div>';
             }
             if (['.mp4'].indexOf(fileType) > -1){
-                var videoDiv = document.createElement('video');
+                let videoDiv = document.createElement('video');
                 videoDiv.setAttribute('controls', 'controls');
-                var sourceDiv = document.createElement('source');
+                let sourceDiv = document.createElement('source');
                 sourceDiv.setAttribute('src', el.file);
                 sourceDiv.setAttribute('type', 'video/mp4');
                 videoDiv.appendChild(sourceDiv);
@@ -154,7 +198,7 @@ function clearLog() {
 }
 
 function printLog(message) {
-    var item = document.createElement("div");
+    let item = document.createElement("div");
     item.innerHTML = message;
     logDiv.appendChild(item);
 }

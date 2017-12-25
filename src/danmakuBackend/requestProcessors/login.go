@@ -41,7 +41,7 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 		db.Close()
 		return
 	}
-
+	defer db.Close()
 
 	if rows.Next() {
 		//session.Values["user"] =
@@ -63,6 +63,6 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 		//io.WriteString(w, "{\"accepted\": 0, \"errMessage\": \"用户名或密码错误\"}")
 	}
 
-	db.Close()
+	//db.Close()
 
 }

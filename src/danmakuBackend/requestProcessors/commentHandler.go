@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"time"
 	"database/sql"
-	"github.com/gorilla/websocket"
 	"fmt"
 	"danmakuBackend/danmakuLib"
+	"html"
+	"strings"
 )
 
-func CommentHanbler(w http.ResponseWriter, r * http.Request){
+func CommentHandler(w http.ResponseWriter, r * http.Request){
 	r.ParseForm()
 	danmakuLib.LogHTTPRequest(r)
 	session := danmakuLib.GetSession(r, w)
@@ -35,20 +36,32 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	//	danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
 	//	return
 	//}
-	if danmakuLib.QueryPermission(session.Values["user"].(string)) < 1 {
+	userPermission := danmakuLib.QueryPermission(session.Values["user"].(string))
+	if userPermission < 1 {
 		danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
 		return
 	}
+
+
+
 
 	username := session.Values["user"]
 	comment := r.Form.Get("text")
 	color := r.Form.Get("color")
 
+	// tokenize comment as administrator command
+	tokens := strings.Fields(comment)
+	if tokens[0] == "//admin" && userPermission > 1 {
+		ProcessAdminCommand(tokens)
+		danmakuLib.AcceptRequest(w)
+		return
+	}
+
 	danmakuItem := &danmakuLib.DanmakuContent{
-		comment,
+		html.EscapeString(comment),
 		color,
 		danmakuLib.DefaultSize,
-		danmakuLib.DefaultType}
+		danmakuLib.DefaultType }
 
 	config := danmakuLib.GetConfig()
 	db, err := sql.Open("mysql", config.DBsource)
@@ -58,6 +71,8 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 		db.Close()
 		return
 	}
+	defer db.Close()
+
 
 	stmt, err := db.Prepare("INSERT INTO comments (user, content, time, color) VALUES (?, ?, now(), ?);")
 	defer stmt.Close()
@@ -77,7 +92,8 @@ func CommentHanbler(w http.ResponseWriter, r * http.Request){
 	}
 	if affect == 1{
 		if Frontend.available {
-			Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.GetJSON()))
+			//Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.GetJSON()))
+			Frontend.SendMessage(danmakuLib.GetJSON(danmakuItem))
 		}
 		danmakuLib.AcceptRequest(w)
 	} else {

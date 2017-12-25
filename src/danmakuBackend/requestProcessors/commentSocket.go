@@ -22,6 +22,10 @@ type FrontStruct struct {
 var Frontend = &FrontStruct{false, nil}
 var connectionKeepRoutineActivated = false
 
+func (front FrontStruct)SendMessage(messsage string) {
+	front.conn.WriteMessage(websocket.TextMessage, []byte(messsage))
+}
+
 func HandleSocket(w http.ResponseWriter, r * http.Request){
 	danmakuLib.LogHTTPRequest(r)
 
@@ -29,7 +33,9 @@ func HandleSocket(w http.ResponseWriter, r * http.Request){
 	// disable origin checker.
 	// allow non-origin connection.
 	var upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+			},
 	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)

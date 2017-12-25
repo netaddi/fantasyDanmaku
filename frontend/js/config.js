@@ -1,4 +1,4 @@
-const server = 'ali.young.moe';
+const server = '127.0.0.1';
 const port = '8081';
 
 const wsUrl = 'ws://' + server + ':' + port + '/ws';

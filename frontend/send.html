@@ -33,7 +33,6 @@
 
 <script>
     function submitReg(){
-
         $.ajax({
             type: "POST",
             url: sendUrl,
@@ -43,6 +42,7 @@
                 console.log(response);
                 if(response.accepted){
                     Materialize.toast("发送成功", 2000);
+                    document.getElementById('text').value = "";
                     // jump to page to send danmaku
                 } else {
                     Materialize.toast(response.errMessage, 2000)
