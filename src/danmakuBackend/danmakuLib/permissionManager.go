@@ -8,12 +8,13 @@ import (
 
 var permissionMap map[string]int
 
-func QueryPermission(userId string) int {
-	if permissionMap == nil{
-		permissionMap = make(map[string]int)
-	}
+func InitPermissionMap() {
+	permissionMap = make(map[string]int)
+}
 
-	permission, userFound := permissionMap[userId];
+func QueryPermission(userId string) int {
+
+	permission, userFound := permissionMap[userId]
 	if userFound {
 		return permission
 	} else {
@@ -24,6 +25,8 @@ func QueryPermission(userId string) int {
 			db.Close()
 			return -1
 		}
+		defer db.Close()
+
 		var permission int
 		dbQuery := fmt.Sprintf("SELECT permission FROM users WHERE reg_code='%s';",
 			userId)
@@ -40,10 +43,6 @@ func QueryPermission(userId string) int {
 }
 
 func SetPermission(userId string, permission int) bool {
-	if permissionMap == nil{
-		permissionMap = make(map[string]int)
-	}
-
 	permissionMap[userId] = permission
 
 	config := GetConfig()
@@ -70,3 +69,6 @@ func SetPermission(userId string, permission int) bool {
 	}
 }
 
+func SetMemoryPermission(userId string, permission int) {
+	permissionMap[userId] = permission
+}

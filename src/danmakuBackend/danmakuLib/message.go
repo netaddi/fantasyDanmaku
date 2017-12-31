@@ -14,3 +14,4 @@ func DenyRequest(w http.ResponseWriter, msg string) {
 func AcceptRequest(w http.ResponseWriter) {
 	io.WriteString(w, "{\"accepted\": 1}")
 }
+

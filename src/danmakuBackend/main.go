@@ -16,6 +16,8 @@ type lastTimestamp int64
 func main() {
 
 	config := danmakuLib.GetConfig()
+	danmakuLib.InitPermissionMap()
+
 	r := mux.NewRouter()
 
 	// router
@@ -24,6 +26,8 @@ func main() {
 	r.HandleFunc("/send", requestProcessors.CommentHandler)
 	r.HandleFunc("/ws", requestProcessors.HandleSocket)
 	r.HandleFunc("/getUserList", requestProcessors.GetUserList)
+	r.HandleFunc("/answer", requestProcessors.ProcessAnswering)
+	r.HandleFunc("/getQuestionResult", requestProcessors.GetQuestionResult)
 
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))

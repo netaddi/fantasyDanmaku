@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 
-<body>
+<body onkeydown="captureKey(event)">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
@@ -32,7 +32,15 @@
 
 
 <script>
-    function submitReg(){
+    function captureKey(event) {
+        // capture enter
+        if (event.keyCode === 13) {
+            submitSend();
+            return false;
+        }
+    }
+
+    function submitSend(){
         $.ajax({
             type: "POST",
             url: sendUrl,
@@ -43,7 +51,6 @@
                 if(response.accepted){
                     Materialize.toast("发送成功", 2000);
                     document.getElementById('text').value = "";
-                    // jump to page to send danmaku
                 } else {
                     Materialize.toast(response.errMessage, 2000)
                 }
@@ -73,7 +80,7 @@
             </div>
         </form>
     </div>
-    <a class="waves-effect waves-light btn" onclick="submitReg()">发射！</a>
+    <a class="waves-effect waves-light btn" onclick="submitSend()">发射！</a>
 </div>
 
 

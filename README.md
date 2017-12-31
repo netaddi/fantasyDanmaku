@@ -75,8 +75,6 @@ and finally, run the compiled executable file, and open performance frontend to 
 
 
 TODO:
-- ban user
-- ban keyword
-- parse admin commands
 - question answering and standings
 - danmaku statistics
+- color pick up

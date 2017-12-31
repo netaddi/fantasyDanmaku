@@ -10,11 +10,12 @@ import (
 
 func GetUserList(w http.ResponseWriter, r * http.Request) {
 	danmakuLib.LogHTTPRequest(r)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	config := danmakuLib.GetConfig()
 	db, err := sql.Open("mysql", config.DBsource)
 	if err != nil {
-		println("failed to connect database.")
+		println("failed to connect database: ", err.Error())
 		io.WriteString(w, "{}")
 		db.Close()
 		return

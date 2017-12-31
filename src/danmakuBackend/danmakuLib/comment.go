@@ -6,6 +6,7 @@ import (
 )
 
 type DanmakuContent struct {
+	MessageType string
 	Text string
 	Color string
 	Size int
@@ -13,7 +14,7 @@ type DanmakuContent struct {
 }
 
 type FrontendAdminMessage struct {
-	IsAdminCommand bool
+	MessageType string
 	AdminOperation string
 	OperationParameter string
 }
@@ -21,14 +22,6 @@ type FrontendAdminMessage struct {
 var DefaultSize = 36
 var DefaultType = "normal"
 
-//func (this DanmakuContent) GetJSON () string{
-//	b, err := json.Marshal(this)
-//	if err != nil {
-//		fmt.Println("jsonize error ! \n")
-//		return ""
-//	}
-//	return string(b)
-//}
 
 func GetJSON(this interface{}) string {
 	b, err := json.Marshal(this)

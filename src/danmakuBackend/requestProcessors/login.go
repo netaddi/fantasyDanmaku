@@ -50,7 +50,7 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 		rows.Scan(&reg_code, &permission)
 		fmt.Println("user login:", reg_code)
 		session.Values["user"] = reg_code
-		danmakuLib.SetPermission(reg_code, permission)
+		danmakuLib.SetMemoryPermission(reg_code, permission)
 		//session.Values["permission"] = permission
 		session.Values["lastTimestamp"] = time.Now().Unix() - 2
 		session.Save(r, w)

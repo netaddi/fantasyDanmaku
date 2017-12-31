@@ -1,4 +1,4 @@
-#blackboard{
+.blackboard{
     position: absolute;
     top: 8%;
     left: 8%;
@@ -9,22 +9,32 @@
     border-radius: 40px;
     z-index: 5;
     background: #000;
-    opacity: 0.64;
+    opacity: 0.8;
     box-shadow: 4px 4px 8px #000;
     transition: 1.5s height cubic-bezier(0, 0.61, 0.33, 1.01);
 }
-#board{
-    padding-left: 40px;
-    padding-top: 40px;
-    display: none;
+.board{
+    display: block;
+    /*display: none;*/
     z-index: 15;
     color: #fff;
     text-shadow: 2px 2px 4px #000;
-    font-size: 48px;
     font-family: "Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","WenQuanYi Micro Hei","Microsoft Yahei",sans-serif;
 }
-#lottery{
+.lottery{
+    font-size: 48px;
+    padding-left: 40px;
+    padding-top: 40px;
     display: none;
+}
+.question-div{
+    display: none;
+    font-size: 32px;
+}
+.standing{
+    font-size: 24px;
+    display: none;
+    padding-left: 32px;
 }
 h2{
     text-align: center;

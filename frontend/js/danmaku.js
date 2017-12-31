@@ -5,6 +5,7 @@ const logDiv = document.getElementById(logDivId);
 // const log = document.getElementById("log");
 
 const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
 let connected;
 // rails for danmaku.
 // let rails = [0];
@@ -56,22 +57,43 @@ let keywordFilter = new KeywordFilter();
 
 function processAdminCommand(operation, parameter) {
     switch (operation) {
-        case "banKeyword" :keywordFilter.addBannedKeyword(parameter);
+        case "banKeyword" :
+            keywordFilter.addBannedKeyword(parameter);
+            break;
+        case "openLottery" :
+            initializePrizeDraw();
+            break;
+        case "closeLottery" :
+            closePrizeDraw();
+            break;
+        case "openLog" :
+            displayLog();
+            break;
+        case "closeLog" :
+            hideLog();
+            break;
     }
 }
 
 function processWSMessage(message){
     printLog(message);
-    if (message === wsToken){
-        connected = true;
-        return;
-    }
     let jsonMessage = JSON.parse(message);
-    if(jsonMessage.IsAdminCommand){
-        processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
-        return
+    console.log(jsonMessage);
+    switch (jsonMessage.MessageType) {
+        case wsToken:
+            connected = true;
+            return;
+        case "adminMessage":
+            processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
+            return;
+        case "danmaku":
+            generateDanmaku(jsonMessage);
+            return;
+        case "question":
+            questionDisplaying.processMessage(jsonMessage);
+            return;
     }
-    generateDanmaku(jsonMessage);
+
 }
 
 function moveDanmaku(danmakuItem, rail){
@@ -129,6 +151,18 @@ function objectMap(obj, call){
         })
 }
 
+function configConnection(conn) {
+    conn.onclose = function (evt) {
+        printLog("connection closed.");
+        alert("connection closed.");
+        conn = new WebSocket(config.wsUrl);
+        configConnection(conn);
+    };
+    conn.onmessage = function (evt) {
+        processWSMessage(evt.data)
+    };
+}
+
 function generateSlides() {
     let xStep = windowWidth;
     let yStep = windowWidth;
@@ -151,9 +185,6 @@ function generateSlides() {
                 let imgDiv = document.createElement('img');
                 imgDiv.setAttribute('src', el.file);
                 showDiv.appendChild(imgDiv);
-                // divHtml = '<div class="step slide" data-x="' + x + '" data-y="' + y + '" data-z="' + z + '">\n' +
-                //     '    <img src="' + el.file + '">\n' +
-                //     '</div>';
             }
             if (['.mp4'].indexOf(fileType) > -1){
                 let videoDiv = document.createElement('video');
@@ -163,11 +194,6 @@ function generateSlides() {
                 sourceDiv.setAttribute('type', 'video/mp4');
                 videoDiv.appendChild(sourceDiv);
                 showDiv.appendChild(videoDiv);
-                // divHtml = '<div class="step slide" data-x="' + x + '" data-y="' + y + '" data-z="' + z + '">\n' +
-                //     '                <video controls="controls">\n' +
-                //     '                    <source src="' + el.file + '" type="video/mp4" />\n' +
-                //     '                </video>' +
-                //     '</div>';
             }
             x += xStep;
             y += yStep;
@@ -178,10 +204,13 @@ function generateSlides() {
 function showInit(){
     generateSlides();
     objectMap(document.getElementsByTagName('img'), function setWidth(el) {
-        el.style.width = windowWidth + 'px';
+        // el.style.width = windowWidth + 'px';
+        el.style.height = windowHeight + 'px';
+        // el.style.width = 'auto';
     });
     objectMap(document.getElementsByTagName('video'), function setWidth(el) {
-        el.width = windowWidth;
+        // el.width = windowWidth;
+        el.height = windowHeight;
     });
 }
 

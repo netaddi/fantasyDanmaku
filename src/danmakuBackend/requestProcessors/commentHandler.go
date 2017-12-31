@@ -15,8 +15,6 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 	danmakuLib.LogHTTPRequest(r)
 	session := danmakuLib.GetSession(r, w)
 
-	
-
 	lastTime, _ := session.Values["lastTimestamp"].(int64)
 	if lastTime == 0 {
 		danmakuLib.DenyRequest(w, "请先登录再发送<a href=\\\"login.html\\\">点我登陆</a>")
@@ -42,9 +40,6 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 		return
 	}
 
-
-
-
 	username := session.Values["user"]
 	comment := r.Form.Get("text")
 	color := r.Form.Get("color")
@@ -58,6 +53,7 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 	}
 
 	danmakuItem := &danmakuLib.DanmakuContent{
+		"danmaku",
 		html.EscapeString(comment),
 		color,
 		danmakuLib.DefaultSize,
@@ -77,18 +73,21 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 	stmt, err := db.Prepare("INSERT INTO comments (user, content, time, color) VALUES (?, ?, now(), ?);")
 	defer stmt.Close()
 	if err != nil {
-		println("error: ", err.Error())
+		println("error 101: ", err.Error())
 		danmakuLib.DenyRequest(w, "database error. ")
+		return
 	}
 	result, err := stmt.Exec(username, comment, color)
 	if err != nil {
-		println("error: ", err.Error())
+		println("error 102: ", err.Error())
 		danmakuLib.DenyRequest(w, "database error. ")
+		return
 	}
 	affect, err := result.RowsAffected()
 	if err != nil {
-		println("error: ", err.Error())
+		println("error 103: ", err.Error())
 		danmakuLib.DenyRequest(w, "database error. ")
+		return
 	}
 	if affect == 1{
 		if Frontend.available {

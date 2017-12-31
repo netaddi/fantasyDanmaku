@@ -13,11 +13,11 @@
         <div id="impress">
         </div>
     </div>
-    <div id="log"></div>
-    <div id="danmaku"></div>
-    <div id="blackboard">
-        <div id="board">
-            <div id="lottery">
+    <div id="log" class="log"></div>
+    <div id="danmaku" class="danmaku"></div>
+    <div id="blackboard" class="blackboard">
+        <div id="board" class="board">
+            <div id="lottery" class="lottery">
                 <h2>抽奖环节</h2>
                 <table style="width:100%">
                     <tr>
@@ -33,6 +33,30 @@
                 </table>
                 <a class="btn" onclick="drawPrize()">抽奖</a>
             </div>
+
+            <div id="question-div" class="question-div">
+                <h4 id="problem" class="problem">这里会出现题目</h4>
+                <h4 class="question-answer">A. <span id="answer1">这里会出现选项A</span></h4>
+                <h4 class="question-answer">B. <span id="answer2">这里会出现选项B</span></h4>
+                <h4 class="question-answer">C. <span id="answer3">这里会出现选项C</span></h4>
+                <h4 class="question-answer">D. <span id="answer4">这里会出现选项D</span></h4>
+                <h4 class="question-countdown">倒计时：<span id="countdown">这里会出现倒计时</span></h4>
+            </div>
+
+            <div id="standing" class="standing">
+                <h4 class="ranking">Top 10 ranking!</h4>
+                <div class="ranking-div">
+                    <table style="width:100%" id="ranking-table">
+                        <tr>
+                            <th>昵称</th>
+                            <th>邀请码</th>
+                            <th>正确回答数</th>
+                            <th>用时（毫秒）</th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -48,15 +72,9 @@
             showInit();
             impress().init();
 
-            var conn = new WebSocket(config.wsUrl);
-            conn.onclose = function (evt) {
-                printLog("connection closed.");
-                alert("connection closed.");
-                conn = new WebSocket(config.wsUrl);
-            };
-            conn.onmessage = function (evt) {
-                processWSMessage(evt.data)
-            };
+            let wsConnection = new WebSocket(config.wsUrl);
+
+            configConnection(wsConnection)
         };
     </script>
     <script>
