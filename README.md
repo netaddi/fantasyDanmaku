@@ -10,8 +10,8 @@ The user frontend provides basic functions (login, register, send danmaku, etc) 
 and provide other functions (show recent user list, ban user, etc) for administrators.
 
 The performance frontend includes three modules:
- - Play the background video / images
- - Play danmuaku
+ - Playing the background video / images
+ - Playing danmuaku
  - A blackboard for displaying other applications (prize drawing, statistics, question standing, etc)
 
 
@@ -22,13 +22,11 @@ The performance frontend includes three modules:
 To deploy it on the server, first you have to set up the database (MySQL).
 You may find the schemes for database (the .sql file) at `/install/installDB.sql`.
 
-At the user frontend, the system is not opened for users to register.
-Instead, you are supposed to generate serial numbers randomly,
-and add these random serial numbers to attribute `reg_code` of table `users`.
+Table `users` stores the information of users. 
+To create a new user, create a new null tuple on this table and fill the attribute `reg_code` with a random serial number.
+if a new users knows the serail number, he is able to register and specify his own username and password.
+This registration will fill the rest of attribute of the new record.
 
-For users of the system, each of them should have one serial number,
-and register the system with their unique serial numbers,
-along with their self-specified nicknames and passwords.
 
 ## backend configuration
 
