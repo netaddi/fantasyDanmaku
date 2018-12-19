@@ -58,6 +58,7 @@ controller has to play the background music manually.
 
 use this command :
 ```
+cd server
 export GOPATH=`pwd`
 ```
 at the root dir of the project.
@@ -75,6 +76,6 @@ and finally, run the compiled executable file, and open performance frontend to 
 
 
 TODO:
-- question answering and standings
-- danmaku statistics
+- administrator page 
+- statistics
 - color pick up

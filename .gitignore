@@ -3,6 +3,8 @@
 *.dll
 *.so
 *.dylib
+data_process/.ipynb_checkpoints
+data_process/digit_600.*
 
 # Test binary, build with `go test -c`
 *.test
@@ -16,21 +18,26 @@
 .DS_Store
 
 
+
 # database config file
-backend/config/db.go
-src/danmakuBackend/config/config.json
-src/danmakuBackend/danmakuBackend
-./src/danmakuBackend/config/*
+server/config/db.go
+#server/src/danmakuBackend/config/config.json
+server/src/danmakuBackend/danmakuBackend
+server/src/danmakuBackend/config/*
+
+
 
 # emacs temp file
 *~
 
 # github golang libe
-src/github.com
+server/src/github.com
+server/pkg
+
 
 .idea/
 
-frontend/images/
+server/frontend/images/
 
 *.flv
 *.jpg

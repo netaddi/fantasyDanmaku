@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="materialize/css/materialize.min.css" media="screen,projection"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body>
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<!-- start -->
+<style>
+    html{
+        background-color: #F7F7F7;
+    }
+    .btn-div{
+        padding-top: 12%;
+        margin-left: 32%;
+        margin-right: 24%;
+    }
+    .btn{
+        padding-left: 40%;
+        padding-right: 40%;
+        font-size: 16px;
+        text-align: center;
+    }
+    .head-class{
+        padding-top: 16%;
+        padding-bottom: 16%;
+    }
+</style>
+
+<script>
+    function submitAnswer(option){
+        $.ajax({
+            type: "POST",
+            url: answerUrl,
+            data: {"answer": option},
+            success: function (response) {
+                response = JSON.parse(response);
+                if (response.accepted) {
+                    Materialize.toast("回答成功", 1500);
+                } else {
+                    Materialize.toast(response.errMessage, 1500)
+                }
+            },
+            error: {}
+        });
+    }
+</script>
+
+<div class="container">
+    <div class="head-class">
+        <h4 class="head center">请作答</h4>
+    </div>
+    <div class="btn-div">
+        <a class="waves-effect waves-light btn" onclick="submitAnswer('A')">A</a>
+    </div>
+    <div class="btn-div">
+        <a class="waves-effect waves-light btn" onclick="submitAnswer('B')">B</a>
+    </div>
+    <div class="btn-div">
+        <a class="waves-effect waves-light btn" onclick="submitAnswer('C')">C</a>
+    </div>
+    <div class="btn-div">
+        <a class="waves-effect waves-light btn" onclick="submitAnswer('D')">D</a>
+    </div>
+</div>
+
+
+<!-- end   -->
+
+</body>
+</html>
