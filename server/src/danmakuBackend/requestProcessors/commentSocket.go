@@ -9,10 +9,10 @@ import (
 
 const WSTokenSendIntervalSecond = 10
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
+//var upgrader = websocket.Upgrader{
+//	ReadBufferSize:  1024,
+//	WriteBufferSize: 1024,
+//}
 
 type FrontStruct struct {
 	available bool
@@ -38,7 +38,7 @@ func checkPingSendingCondition() bool {
 }
 
 func (front FrontStruct)SendMessage(messsage string) {
-	front.conn.WriteMessage(websocket.TextMessage, []byte(messsage))
+	_ = front.conn.WriteMessage(websocket.TextMessage, []byte(messsage))
 }
 
 func HandleSocket(w http.ResponseWriter, r * http.Request){
@@ -64,17 +64,13 @@ func HandleSocket(w http.ResponseWriter, r * http.Request){
 
 	// infinitely write message to keep connection
 	if !connectionKeepRoutineActivated {
-		//go func() {
-			for {
-				//if checkPingSendingCondition() {
-					connectedMessage := &ConnectedMessage{configs.WSToken}
-					messageString := danmakuLib.GetJSON(connectedMessage)
-					Frontend.conn.WriteMessage(websocket.TextMessage, []byte(messageString))
-					time.Sleep(time.Second * WSTokenSendIntervalSecond)
-				//}
-			}
-		//}()
 		connectionKeepRoutineActivated = true
+		for {
+			connectedMessage := &ConnectedMessage{configs.WSToken}
+			messageString := danmakuLib.GetJSON(connectedMessage)
+			_ = Frontend.conn.WriteMessage(websocket.TextMessage, []byte(messageString))
+			time.Sleep(time.Second * WSTokenSendIntervalSecond)
+		}
 	}
 
 	return

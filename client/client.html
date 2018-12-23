@@ -18,7 +18,7 @@
     <div id="blackboard" class="blackboard">
         <div id="board" class="board">
             <div id="lottery" class="lottery">
-                <h2>抽奖环节</h2>w
+                <h2>抽奖环节</h2>
                 <table style="width:100%">
                     <tr>
                         <th>门票邀请码</th>
@@ -31,7 +31,7 @@
                         <th></th>
                     </tr>
                 </table>
-                <a class="btn" onclick="drawPrize()">抽奖</a>
+                <a class="btn" onclick="blackboardController.drawPrize()">抽奖</a>
             </div>
 
             <div id="question-div" class="question-div">
@@ -59,17 +59,17 @@
         </div>
         </div>
 
+    <script type="text/javascript" src="js/impress.js"></script>
     <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/blackboard.js"></script>
     <script type="text/javascript" src="js/danmaku.js"></script>
     <script type="text/javascript" src="js/showList.js"></script>
-    <script type="text/javascript" src="js/impress.js"></script>
-    <script type="text/javascript" src="js/blackboard.js"></script>
 
     <script>
         window.onload = function () {
 
             showInit();
-            impress().init();
+            impressController.init();
 
             let wsConnection = new WebSocket(config.wsUrl);
 

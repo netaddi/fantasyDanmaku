@@ -1,14 +1,13 @@
 package main
 
-
 import (
-	"fmt"
 	"danmakuBackend/danmakuLib"
 	"danmakuBackend/requestProcessors"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type lastTimestamp int64
@@ -31,7 +30,6 @@ func main() {
 
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))
-
 
 	fmt.Println("Started listening at port ", strconv.Itoa(config.Port))
 

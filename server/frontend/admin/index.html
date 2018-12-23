@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="EN">
+<meta charset="UTF-8">
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css" media="screen,projection"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Controller</title>
+</head>
+
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="../js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="../materialize/js/materialize.min.js"></script>
+<!-- start -->
+<style>
+    html{
+        background-color: #F7F7F7;
+    }
+    .control-btn{
+        height: 64px;
+        line-height: 64px;
+        /*width: 120px;*/
+        font-size: 20px;
+        margin-right: 24px;
+    }
+    .container{
+        max-width: 1600px;
+        width: 90%;
+    }
+    .a-div{
+        /*padding-bottom: 16px;*/
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="a-div">
+            <h5>Display Control</h5>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin display prev')">
+                Prev
+            </a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin display play')">
+                Play
+            </a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin display next')">
+                Next
+            </a>
+            <a class = "btn dropdown-button control-btn" href = "#" data-activates = "dropdown">
+                &nbsp;&nbsp;&nbsp;&nbsp; GOTO &nbsp;&nbsp;&nbsp;&nbsp;
+            </a>
+            <ul id="dropdown" class = "dropdown-content">
+            </ul>
+            <a class="waves-effect waves-light btn control-btn deep-orange"
+               onclick="sendText('//admin display reset')">Reset</a>
+            <a class="waves-effect waves-light btn control-btn deep-orange"
+               onclick="sendText('//admin display refresh')">Refresh</a>
+
+        </div>
+
+        <h5>Blackboard Control</h5>
+        <div class="a-div">
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin open log')">Open Log</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin close log')">Close Log</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin open lottery')">Open Lottery</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin close lottery')">Close Lottery</a>
+        </div>
+        <h5>Question Control</h5>
+        <div class="a-div">
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin question prepare')">Prepare</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin question start')">start</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin question end')">end</a>
+            <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin question ranking')">ranking</a>
+        </div>
+
+        <script type="text/javascript">
+
+
+        </script>
+    </div>
+</body>
+<script type="text/javascript">
+    const gotoListLength = 30;
+    window.onload = function () {
+        const dropdownDom = document.getElementById('dropdown');
+        [...Array(gotoListLength).keys()].forEach(id => {
+            dropdownDom.innerHTML +=
+                `<li><a onclick="sendText('//admin display goto ${id}')">${id}</a></li>`
+        })
+    };
+    function sendText(text){
+        $.ajax({
+            type: "POST",
+            url: '/send',
+            data: {'text': text},
+            success: function (response) {
+                response = JSON.parse(response);
+                console.log(response);
+                if(response.accepted){
+                    Materialize.toast("发送成功", 2000);
+                    document.getElementById('text').value = "";
+                } else {
+                    Materialize.toast(response.errMessage, 2000)
+                }
+
+            },
+            error: {}
+        });
+    }
+</script>
+
+</html>

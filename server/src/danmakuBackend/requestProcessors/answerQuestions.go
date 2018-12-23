@@ -1,17 +1,18 @@
 package requestProcessors
 
 import (
-	"database/sql"
 	"danmakuBackend/danmakuLib"
-	"time"
+	"database/sql"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
-	"io"
-	"encoding/json"
+	"sync"
+	"time"
 )
 
 const optionCount = 4
-const countdownSecond = 10
+const countdownSecond = 1
 const questionMessageType = "question"
 
 type Problem struct {
@@ -47,81 +48,92 @@ type PersonResult struct {
 	Penalty string
 }
 
+type QuestionUserPair struct {
+	QuestionId int
+	UserId string
+}
+
+func (pair QuestionUserPair) String() string {
+	return pair.UserId + "_" + strconv.Itoa(pair.QuestionId)
+}
+
+type SingleAnswerRecord struct {
+	Answer string
+	Penalty int64
+}
+
 var problemSet []Problem
 var currentProblemId int
 var currentProblemIndex int
 var currentProblemStartTime int64
 var answeringStarted bool
-var answerRecord map[string]bool
+//var answerRecord map[string]bool
+var answerRecords sync.Map
 var questionInitialized = false
 
-func getMilisecondTime() int64 {
+func getMillisecondTime() int64 {
 	return time.Now().UnixNano() / 1000000
 }
 
-// load all the prolems from database to var problemSet
-func InitializeProlemSet(){
+// load all the problems from database to var problemSet
+func InitializeProblemSet(){
 
 	if questionInitialized {
 		return
 	}
-
 	config := danmakuLib.GetConfig()
 
-	db, err := sql.Open("mysql", config.DBsource)
-	if err != nil {
-		println("failed to connect database: ", err.Error())
-		db.Close()
-		return
-	}
+	db, _ := sql.Open("mysql", config.DBsource)
 	defer db.Close()
 
 	dbQuery := "SELECT id, question, answer1, answer2, answer3, answer4, correct_answer FROM problem_set;"
-	rows, err := db.Query(dbQuery)
-	if err != nil {
-		println("failed to query database.: ", err.Error())
-	} else {
-		defer rows.Close()
-		var thisProblem Problem
-		for rows.Next(){
-			err := rows.Scan(&thisProblem.Id,
-							&thisProblem.Question,
-							&thisProblem.Answers[0],
-							&thisProblem.Answers[1],
-							&thisProblem.Answers[2],
-							&thisProblem.Answers[3],
-							&thisProblem.correctAnswer)
-
-			if err != nil {
-				println("question error: ", err.Error())
-			}
-
-			problemSet = append(problemSet, thisProblem)
-		}
+	rows, _ := db.Query(dbQuery)
+	defer rows.Close()
+	var thisProblem Problem
+	for rows.Next(){
+		//_ := rows.Scan(&thisProblem.Id,
+		_ = rows.Scan(&thisProblem.Id,
+			&thisProblem.Question,
+			&thisProblem.Answers[0],
+			&thisProblem.Answers[1],
+			&thisProblem.Answers[2],
+			&thisProblem.Answers[3],
+			&thisProblem.correctAnswer,
+		)
+		problemSet = append(problemSet, thisProblem)
 	}
 	questionInitialized = true
 }
 
 func prepareAnswering(){
 	answeringStarted = false
-	answerRecord = make(map[string]bool)
-	InitializeProlemSet()
-	initializeMessage := &QuestionBasicOperation{questionMessageType, "prepare"}
+	//answerRecord = make(map[string]bool)
+	InitializeProblemSet()
+	initializeMessage := &QuestionBasicOperation{
+		MessageType: questionMessageType,
+		QuestionOperation: "prepare",
+	}
 	Frontend.SendMessage(danmakuLib.GetJSON(initializeMessage))
 }
 
 func sendRanking(){
-	initializeMessage := &QuestionBasicOperation{questionMessageType, "ranking"}
+	initializeMessage := &QuestionBasicOperation{
+		MessageType: questionMessageType,
+		QuestionOperation: "ranking",
+	}
 	Frontend.SendMessage(danmakuLib.GetJSON(initializeMessage))
 }
 
 func endAnswering(){
-	initializeMessage := &QuestionBasicOperation{questionMessageType, "end"}
+	initializeMessage := &QuestionBasicOperation{
+		MessageType: questionMessageType,
+		QuestionOperation: "end",
+	}
 	Frontend.SendMessage(danmakuLib.GetJSON(initializeMessage))
 }
 
 func startAnswering(){
-	//InitializeProlemSet()
+	//InitializeProblemSet()
 	if answeringStarted {
 		return
 	}
@@ -129,127 +141,109 @@ func startAnswering(){
 	for index, currentProblem := range problemSet{
 
 		secondLeft := countdownSecond
-		questionMEssage := &QuestionUpdateOperation{
-			questionMessageType,
-			"updateQuestion",
-			currentProblem.Question,
-			currentProblem.Answers,
-			secondLeft }
+		questionMessage := &QuestionUpdateOperation{
+			MessageType:       questionMessageType,
+			QuestionOperation: "updateQuestion",
+			Question:          currentProblem.Question,
+			Answers:           currentProblem.Answers,
+			TimeLeft:          secondLeft,
+		}
 
-		Frontend.SendMessage(danmakuLib.GetJSON(questionMEssage))
+		Frontend.SendMessage(danmakuLib.GetJSON(questionMessage))
 		currentProblemId = currentProblem.Id
-		currentProblemStartTime = getMilisecondTime()
+		currentProblemStartTime = getMillisecondTime()
 		currentProblemIndex = index + 1
 		for secondLeft >= 0{
 			secondLeft--
 			time.Sleep(time.Second)
-			countdownMessage := &CountdownUpdateOperation{
-				questionMessageType,
-				"updateCountdown",
-				secondLeft }
+			countdownMessage := &CountdownUpdateOperation {
+				MessageType:       questionMessageType,
+				QuestionOperation: "updateCountdown",
+				TimeLeft:          secondLeft,
+			}
 			Frontend.SendMessage(danmakuLib.GetJSON(countdownMessage))
 		}
 
 	}
-	endMessage := &QuestionUpdateOperation{
-		questionMessageType,
-		"updateQuestion",
-		"答题结束！",
-		[optionCount]string{},
-		0 }
-	Frontend.SendMessage(danmakuLib.GetJSON(endMessage))
 
 	answeringStarted = false
+	endMessage := &QuestionUpdateOperation {
+		MessageType:       questionMessageType,
+		QuestionOperation: "updateQuestion",
+		Question:          "答题结束！正在写入数据库……",
+	}
+	Frontend.SendMessage(danmakuLib.GetJSON(endMessage))
+
+	dumpAnswerRecords(answerRecords)
+
+	answeringStarted = false
+	endMessage.Question = "数据库写入完成！"
+	Frontend.SendMessage(danmakuLib.GetJSON(endMessage))
 
 }
 
+func dumpAnswerRecords(answerRecords sync.Map) {
+
+	config := danmakuLib.GetConfig()
+	db, _ := sql.Open("mysql", config.DBsource)
+	defer db.Close()
+
+	resetStmt, _ := db.Prepare("DELETE FROM user_answer WHERE 1=1;")
+	_, _ = resetStmt.Exec()
+	resetStmt.Close()
+
+	stmt, _ := db.Prepare(`INSERT INTO user_answer 
+  						(user_id, question_id, answer, time) VALUES (?, ?, ?, ?);`)
+	defer stmt.Close()
+
+	answerRecords.Range(func(key, value interface{}) bool {
+
+		questionId, userId := key.(QuestionUserPair).QuestionId, key.(QuestionUserPair).UserId
+		answer, penalty := value.(SingleAnswerRecord).Answer, value.(SingleAnswerRecord).Penalty
+
+		result, _ := stmt.Exec(userId, questionId, answer, penalty)
+		println(questionId, userId, answer, penalty)
+		_, _ = result.RowsAffected()
+
+		return true
+	})
+}
+
 func ProcessAnswering(w http.ResponseWriter, r * http.Request){
-	r.ParseForm()
+	_ = r.ParseForm()
 	danmakuLib.LogHTTPRequest(r)
 	session := danmakuLib.GetSession(r, w)
 
-	username := session.Values["user"]
+	userId := session.Values["user"]
 
-	if username == nil {
+	if userId == nil {
 		danmakuLib.DenyRequest(w, "请先登录再答题<a href=\\\"login.html\\\">点我登陆</a>")
 		return
 	}
 
 	if !answeringStarted {
-		danmakuLib.DenyRequest(w, "答题还没开始，点我也没用哦！")
+		danmakuLib.DenyRequest(w, "答题还没开始或已经结束，点我也没用哦！")
 		return
+	}
+
+	questionUserPair := &QuestionUserPair{
+		QuestionId: currentProblemId,
+		UserId: userId.(string),
 	}
 
 	thisAnswer := r.Form.Get("answer")
-	thisTime := getMilisecondTime() - currentProblemStartTime
+	thisTime := getMillisecondTime() - currentProblemStartTime
 
-	config := danmakuLib.GetConfig()
-	db, err := sql.Open("mysql", config.DBsource)
-	if err != nil {
-		println("failed to connect database.")
-		danmakuLib.DenyRequest(w, "failed to connect database.")
-		db.Close()
-		return
-	}
-	defer db.Close()
-
-	_, recordFound := answerRecord[username.(string) + "__" + strconv.Itoa(currentProblemId)]
-	if recordFound {
-		// this user has answered this question before
-		stmt, err := db.Prepare("UPDATE user_answer SET answer=? , time=? WHERE user_id=? and question_id=?;")
-		//println(thisAnswer, thisTime, username, currentProblemId)
-		result, err := stmt.Exec(thisAnswer, thisTime, username, currentProblemId)
-		if err != nil {
-			danmakuLib.DenyRequest(w, "failed to write database.")
-			println("err: ", err.Error())
-		}
-		affect, err := result.RowsAffected()
-		defer stmt.Close()
-		if err != nil {
-			danmakuLib.DenyRequest(w, "failed to write database.")
-			println("err: ", err.Error())
-		}
-		if affect == 1 {
-			danmakuLib.DenyRequest(w, "成功修改第" + strconv.Itoa(currentProblemIndex) + "题的回答")
-			//danmakuLib.AcceptRequest(w)
-		} else {
-			danmakuLib.DenyRequest(w, "failed to write database. no update")
-			println("err: no row affected. ")
-		}
-	} else {
-		answerRecord[username.(string) + "__" + strconv.Itoa(currentProblemId)] = true
-
-		stmt, err := db.Prepare("INSERT INTO user_answer (user_id, question_id, answer, time) " +
-										"VALUES (?, ?, ?, ?);;")
-		defer stmt.Close()
-		if err != nil {
-			println("error: ", err.Error())
-			danmakuLib.DenyRequest(w, "database error. ")
-		}
-		result, err := stmt.Exec(username, currentProblemId, thisAnswer, thisTime)
-		if err != nil {
-			println("error: ", err.Error())
-			danmakuLib.DenyRequest(w, "database error. ")
-		}
-		affect, err := result.RowsAffected()
-		if err != nil {
-			println("error: ", err.Error())
-			danmakuLib.DenyRequest(w, "database error. ")
-		}
-		if affect == 1{
-			danmakuLib.DenyRequest(w, "成功回答第" + strconv.Itoa(currentProblemIndex) + "题")
-			//danmakuLib.AcceptRequest(w)
-		} else {
-			danmakuLib.DenyRequest(w, "数据库写入失败")
-		}
+	answerRecord := &SingleAnswerRecord{
+		Answer: thisAnswer,
+		Penalty: thisTime,
 	}
 
-	if err != nil {
-		println("failed to query database.: ", err.Error())
-		danmakuLib.DenyRequest(w, "failed to query database")
-		//db.Close()
-		return
-	}
+	//_, questionAnswered := answerRecords.Load()
+	answerRecords.Store(*questionUserPair, *answerRecord)
+
+	danmakuLib.DenyRequest(w, "成功回答第" + strconv.Itoa(currentProblemIndex) + "题")
+
 }
 
 func GetQuestionResult(w http.ResponseWriter, r * http.Request){
@@ -257,13 +251,7 @@ func GetQuestionResult(w http.ResponseWriter, r * http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	config := danmakuLib.GetConfig()
-	db, err := sql.Open("mysql", config.DBsource)
-	if err != nil {
-		println("failed to connect database: ", err.Error())
-		io.WriteString(w, "{}")
-		db.Close()
-		return
-	}
+	db, _ := sql.Open("mysql", config.DBsource)
 	defer db.Close()
 
 	dbQuery := `SELECT user_id, nickname, count(user_id), sum(time)
@@ -273,20 +261,16 @@ func GetQuestionResult(w http.ResponseWriter, r * http.Request){
 							WHERE user_answer.answer = problem_set.correct_answer
 					GROUP BY user_id
 					ORDER BY count(user_id) DESC , sum(time) ASC;`
-	rows, err := db.Query(dbQuery)
-	if err != nil {
-		println("failed to query database.: ", err.Error())
-		io.WriteString(w, "{}")
-	} else {
-		defer rows.Close()
-		results := make([]PersonResult, 0)
-		for rows.Next(){
-			var userResult PersonResult
-			rows.Scan(&userResult.UserId, &userResult.Nickname, &userResult.CorrectCount, &userResult.Penalty)
-			results = append(results, userResult)
-		}
-		jsonData, _ := json.Marshal(results)
-		io.WriteString(w, string(jsonData))
+	rows, _ := db.Query(dbQuery)
+
+	defer rows.Close()
+	results := make([]PersonResult, 0)
+	for rows.Next(){
+		var userResult PersonResult
+		_ = rows.Scan(&userResult.UserId, &userResult.Nickname, &userResult.CorrectCount, &userResult.Penalty)
+		results = append(results, userResult)
 	}
+	jsonData, _ := json.Marshal(results)
+	_, _ = io.WriteString(w, string(jsonData))
 
 }

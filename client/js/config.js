@@ -1,13 +1,12 @@
 const server = 'localhost';
 const port = '8081';
 
-const wsUrl = 'ws://' + server + ':' + port + '/ws';
-const regUrl = '//' +  server + ':' + port + '/reg';
-const answerUrl = '//' +  server + ':' + port + '/answer';
-const loginUrl = '//' +  server + ':' + port + '/login';
-const sendUrl = '//' +  server + ':' + port + '/send';
-const userListUrl = 'http://' +  server + ':' + port + '/getUserList';
-const resultUrl = 'http://' +  server + ':' + port + '/getQuestionResult';
+
+// const wsUrl = 'ws://' + server + ':' + port + '/ws';
+const wsUrl = `ws://${server}:${port}/ws`;
+const httpUrlBase = `http://${server}:${port}/`;
+const userListUrl = httpUrlBase + 'getUserList';
+const questionResultUrl = httpUrlBase + 'getQuestionResult';
 
 
 const config = {

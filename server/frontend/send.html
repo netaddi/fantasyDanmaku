@@ -16,7 +16,6 @@
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
-<script type="text/javascript" src="js/config.js"></script>
 <!-- start -->
 <style>
     html{
@@ -43,7 +42,7 @@
     function submitSend(){
         $.ajax({
             type: "POST",
-            url: sendUrl,
+            url: '/send',
             data: $('form').serialize(),
             success: function (response) {
                 response = JSON.parse(response);

@@ -2,14 +2,12 @@
 const danmakuDivId = 'danmaku';
 const logDivId = 'log';
 const logDiv = document.getElementById(logDivId);
-// const log = document.getElementById("log");
 
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 let connected;
-// rails for danmaku.
-// let rails = [0];
 
+const impressController = impress();
 
 class KeywordFilter{
     constructor() {
@@ -55,16 +53,16 @@ let rails = new DanmakuRail();
 let keywordFilter = new KeywordFilter();
 
 
-function processAdminCommand(operation, parameter) {
+async function processAdminCommand(operation, parameter) {
     switch (operation) {
         case "banKeyword" :
             keywordFilter.addBannedKeyword(parameter);
             break;
         case "openLottery" :
-            initializePrizeDraw();
+            await blackboardController.initializePrizeDraw();
             break;
         case "closeLottery" :
-            closePrizeDraw();
+            blackboardController.closePrizeDraw();
             break;
         case "openLog" :
             displayLog();
@@ -72,10 +70,27 @@ function processAdminCommand(operation, parameter) {
         case "closeLog" :
             hideLog();
             break;
+        case "prev":
+            impressController.prev();
+            break;
+        case "next":
+            impressController.next();
+            break;
+        case "goto":
+            impressController.goto(parseInt(parameter));
+            break;
+        case "play":
+            break;
+        case "refresh":
+            location.reload();
+            break;
+        case "init":
+            impressController.swipe()
     }
 }
 
-function processWSMessage(message){
+
+async function processWSMessage(message){
     printLog(message);
     let jsonMessage = JSON.parse(message);
     console.log(jsonMessage);
@@ -84,7 +99,7 @@ function processWSMessage(message){
             connected = true;
             return;
         case "adminMessage":
-            processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
+            await processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
             return;
         case "danmaku":
             generateDanmaku(jsonMessage);
@@ -158,8 +173,8 @@ function configConnection(conn) {
         conn = new WebSocket(config.wsUrl);
         configConnection(conn);
     };
-    conn.onmessage = function (evt) {
-        processWSMessage(evt.data)
+    conn.onmessage = async function (evt) {
+        await processWSMessage(evt.data)
     };
 }
 
@@ -174,7 +189,7 @@ function generateSlides() {
 
     showList.map(
         function(el){
-            let fileType = el.file.match(/\..+$/)[0];
+            let fileType = el.match(/\..+$/)[0];
             let showDiv = document.createElement('div');
             showDiv.setAttribute('class', 'step slide');
             showDiv.setAttribute('data-x', x.toString());
@@ -183,14 +198,14 @@ function generateSlides() {
             impressDiv.appendChild(showDiv);
             if (1){
                 let imgDiv = document.createElement('img');
-                imgDiv.setAttribute('src', el.file);
+                imgDiv.setAttribute('src', el);
                 showDiv.appendChild(imgDiv);
             }
             if (['.mp4'].indexOf(fileType) > -1){
                 let videoDiv = document.createElement('video');
                 videoDiv.setAttribute('controls', 'controls');
                 let sourceDiv = document.createElement('source');
-                sourceDiv.setAttribute('src', el.file);
+                sourceDiv.setAttribute('src', el);
                 sourceDiv.setAttribute('type', 'video/mp4');
                 videoDiv.appendChild(sourceDiv);
                 showDiv.appendChild(videoDiv);
@@ -204,12 +219,9 @@ function generateSlides() {
 function showInit(){
     generateSlides();
     objectMap(document.getElementsByTagName('img'), function setWidth(el) {
-        // el.style.width = windowWidth + 'px';
         el.style.height = windowHeight + 'px';
-        // el.style.width = 'auto';
     });
     objectMap(document.getElementsByTagName('video'), function setWidth(el) {
-        // el.width = windowWidth;
         el.height = windowHeight;
     });
 }

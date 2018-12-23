@@ -32,14 +32,13 @@ func QueryPermission(userId string) int {
 			userId)
 		rows, err := db.Query(dbQuery)
 		if rows.Next() {
-			rows.Scan(&permission)
+			_ = rows.Scan(&permission)
 			permissionMap[userId] = permission
 			return permission
 		} else {
 			return -1
 		}
 	}
-	return -1
 }
 
 func SetPermission(userId string, permission int) bool {

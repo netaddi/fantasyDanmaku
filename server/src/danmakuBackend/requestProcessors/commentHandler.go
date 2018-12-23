@@ -1,63 +1,70 @@
 package requestProcessors
 
 import (
-	"net/http"
-	"time"
-	"database/sql"
-	"fmt"
 	"danmakuBackend/danmakuLib"
+	"database/sql"
+	"github.com/gorilla/sessions"
 	"html"
+	"net/http"
 	"strings"
+	"time"
 )
 
+func checkEligibility(r * http.Request, session * sessions.Session) (bool, string){
+	lastTime, _ := session.Values["lastTimestamp"].(int64)
+
+	// check login status
+	if lastTime == 0 {
+		return false, "请先登录再发送<a href=\\\"login.html\\\">点我登陆</a>"
+	}
+
+	userPermission := danmakuLib.QueryPermission(session.Values["user"].(string))
+
+	// check user permission
+	if userPermission < 1 {
+		return false, "您的账号因为违规操作被封禁，请联系管理员解封"
+	}
+	if userPermission > 1 {
+		// tokenize comment as administrator command
+		tokens := strings.Fields(r.Form.Get("text"))
+		if tokens[0] == "//admin" && userPermission > 1 {
+			ProcessAdminCommand(tokens)
+			return false, "Admin command sent."
+		}
+	}
+	// check send time interval
+	timeDifference := time.Now().Unix() - lastTime
+	if timeDifference < 2 {
+		return false, "请2秒之后再发送！"
+	}
+	session.Values["lastTimestamp"] = time.Now().Unix()
+	return true, ""
+}
+
 func CommentHandler(w http.ResponseWriter, r * http.Request){
-	r.ParseForm()
+	_ = r.ParseForm()
 	danmakuLib.LogHTTPRequest(r)
 	session := danmakuLib.GetSession(r, w)
 
-	lastTime, _ := session.Values["lastTimestamp"].(int64)
-	if lastTime == 0 {
-		danmakuLib.DenyRequest(w, "请先登录再发送<a href=\\\"login.html\\\">点我登陆</a>")
+	sendEligible, msg := checkEligibility(r, session)
+	if !sendEligible {
+		danmakuLib.DenyRequest(w, msg)
 		return
 	}
-	timeDifference := time.Now().Unix() - lastTime
-	fmt.Print(timeDifference)
-	if timeDifference < 2 {
-		danmakuLib.DenyRequest(w, "请2秒之后再发送！")
-		return
-	}
-	session.Values["lastTimestamp"] = time.Now().Unix()
-	session.Save(r, w)
 
-	//permission, _ := session.Values["permission"].(int)
-	//if permission < 0{
-	//	danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
-	//	return
-	//}
-	userPermission := danmakuLib.QueryPermission(session.Values["user"].(string))
-	if userPermission < 1 {
-		danmakuLib.DenyRequest(w, "您的账号因为违规操作被封禁，请联系管理员解封")
-		return
-	}
+	_ = session.Save(r, w)
 
 	username := session.Values["user"]
 	comment := r.Form.Get("text")
 	color := r.Form.Get("color")
 
-	// tokenize comment as administrator command
-	tokens := strings.Fields(comment)
-	if tokens[0] == "//admin" && userPermission > 1 {
-		ProcessAdminCommand(tokens)
-		danmakuLib.AcceptRequest(w)
-		return
-	}
-
 	danmakuItem := &danmakuLib.DanmakuContent{
-		"danmaku",
-		html.EscapeString(comment),
-		color,
-		danmakuLib.DefaultSize,
-		danmakuLib.DefaultType }
+		MessageType: "danmaku",
+		Text:        html.EscapeString(comment),
+		Color:       color,
+		Size:        danmakuLib.DefaultSize,
+		CommentType: danmakuLib.DefaultType,
+	}
 
 	config := danmakuLib.GetConfig()
 	db, err := sql.Open("mysql", config.DBsource)
@@ -72,26 +79,10 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 
 	stmt, err := db.Prepare("INSERT INTO comments (user, content, time, color) VALUES (?, ?, now(), ?);")
 	defer stmt.Close()
-	if err != nil {
-		println("error 101: ", err.Error())
-		danmakuLib.DenyRequest(w, "database error. ")
-		return
-	}
 	result, err := stmt.Exec(username, comment, color)
-	if err != nil {
-		println("error 102: ", err.Error())
-		danmakuLib.DenyRequest(w, "database error. ")
-		return
-	}
 	affect, err := result.RowsAffected()
-	if err != nil {
-		println("error 103: ", err.Error())
-		danmakuLib.DenyRequest(w, "database error. ")
-		return
-	}
-	if affect == 1{
+	if affect == 1 {
 		if Frontend.available {
-			//Frontend.conn.WriteMessage(websocket.TextMessage, []byte(danmakuItem.GetJSON()))
 			Frontend.SendMessage(danmakuLib.GetJSON(danmakuItem))
 		}
 		danmakuLib.AcceptRequest(w)

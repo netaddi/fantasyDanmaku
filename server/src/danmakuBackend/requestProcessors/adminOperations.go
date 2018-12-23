@@ -8,20 +8,25 @@ func sendAdminCommandToFrontend(operation string, parameter string){
 	message := &danmakuLib.FrontendAdminMessage{
 		MessageType:        "adminMessage",
 		AdminOperation:     operation,
-		OperationParameter: parameter}
+		OperationParameter: parameter,
+	}
 	Frontend.SendMessage(danmakuLib.GetJSON(message))
 }
 
 func ProcessAdminCommand (commandTokens []string) {
 	switch commandTokens[1] {
+	case "display":
+		if commandTokens[2] == "goto" {
+			sendAdminCommandToFrontend("goto", commandTokens[3])
+		} else {
+			sendAdminCommandToFrontend(commandTokens[2], "")
+		}
 	case "ban":
-		switch commandTokens[2] {
-		case "user":
+		if commandTokens[2] == "user" {
 			danmakuLib.SetPermission( commandTokens[3], 0 )
-			break
-		case "keyword":
+		}
+		if commandTokens[2] == "keyword" {
 			sendAdminCommandToFrontend("banKeyword", commandTokens[3])
-			break
 		}
 		break
 	case "open":
@@ -29,7 +34,7 @@ func ProcessAdminCommand (commandTokens []string) {
 		case "lottery":
 			sendAdminCommandToFrontend("openLottery", "")
 			break
-		case "log" :
+		case "log":
 			sendAdminCommandToFrontend("openLog", "")
 			break
 		}
