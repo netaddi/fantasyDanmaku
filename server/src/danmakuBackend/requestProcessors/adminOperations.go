@@ -29,6 +29,11 @@ func ProcessAdminCommand (commandTokens []string) {
 			sendAdminCommandToFrontend("banKeyword", commandTokens[3])
 		}
 		break
+	case "unban":
+		if commandTokens[2] == "user" {
+			danmakuLib.SetPermission( commandTokens[3], 1 )
+		}
+		break
 	case "open":
 		switch commandTokens[2] {
 		case "lottery":
@@ -37,17 +42,13 @@ func ProcessAdminCommand (commandTokens []string) {
 		case "log":
 			sendAdminCommandToFrontend("openLog", "")
 			break
+		case "ranking":
+			sendAdminCommandToFrontend("openCommentRanking", "")
+			break
 		}
 		break
 	case "close":
-		switch commandTokens[2] {
-		case "lottery":
-			sendAdminCommandToFrontend("closeLottery", "")
-			break
-		case "log":
-			sendAdminCommandToFrontend("closeLog", "")
-			break
-		}
+		sendAdminCommandToFrontend("close", "")
 		break
 	case "question":
 		switch commandTokens[2] {
@@ -65,6 +66,4 @@ func ProcessAdminCommand (commandTokens []string) {
 			break
 		}
 	}
-
-
 }

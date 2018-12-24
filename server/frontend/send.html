@@ -15,6 +15,7 @@
 <body onkeydown="captureKey(event)">
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="js/jscolor.js"></script>
 <script type="text/javascript" src="materialize/js/materialize.min.js"></script>
 <!-- start -->
 <style>
@@ -73,7 +74,8 @@
             </div>
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="color" type="text" class="validate" name="color" value="#FFFFFF">
+                    <input id="color" type="text" class="validate jscolor" data-jscolor="{width:256}"
+                           name="color" value="#FFFFFF">
                     <label for="color">颜色</label>
                 </div>
             </div>

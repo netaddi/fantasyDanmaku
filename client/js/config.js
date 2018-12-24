@@ -7,6 +7,7 @@ const wsUrl = `ws://${server}:${port}/ws`;
 const httpUrlBase = `http://${server}:${port}/`;
 const userListUrl = httpUrlBase + 'getUserList';
 const questionResultUrl = httpUrlBase + 'getQuestionResult';
+const commentRankingUrl = httpUrlBase + 'getCommentRanking';
 
 
 const config = {

@@ -808,6 +808,7 @@
             prev: prev,
             swipe: swipe,
             tear: tear,
+            activeStep: activeStep,
             lib: lib
         } );
 

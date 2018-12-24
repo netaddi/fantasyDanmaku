@@ -43,9 +43,26 @@ class BlackBoardController {
         document.getElementById('lottery').style.display = 'block';
     }
 
-    closePrizeDraw() {
+    closeBlackBoard() {
         document.getElementById('lottery').style.display = 'none';
+        document.getElementById('ranking').style.display = 'none';
         this.closeBlackboard();
+    }
+
+    async openCommentRanking(){
+        const rankingList = await getJSON(commentRankingUrl);
+        const rankingDiv = document.getElementById('ranking-table');
+        const displayCount = 15;
+        this.openBlackboard();
+
+        rankingList.slice(0, displayCount).forEach(item => {
+            rankingDiv.innerHTML += `<tr>
+                    <td>${item.nickname}</td>
+                    <td>${item.count}</td>
+                </tr>`
+        });
+        document.getElementById('ranking').style.display = 'block';
+
     }
 
     drawPrize() {
@@ -70,61 +87,6 @@ class BlackBoardController {
     }
 }
 
-// function getJSON(theUrl, callback)
-// {
-//     let request = new XMLHttpRequest();
-//     request.open('GET', theUrl, true);
-//
-//     request.onload = function() {
-//         if (this.status >= 200 && this.status < 400) {
-//             let data = JSON.parse(this.response);
-//             callback(data)
-//         }
-//     };
-//     request.send();
-// }
-// let userList;
-// let prizeDrawing = false;
-// let prizeInterval;
-
-// async function initializePrizeDraw(){
-//     userList = await getJSON(userListUrl);
-//     openBlackboard();
-//     document.getElementById('lottery').style.display = 'block';
-//
-//     // getJSON('/getUserList', function (userData) {
-//     getJSON(userListUrl, function (userData) {
-//         userList = userData;
-//         openBlackboard();
-//         document.getElementById('lottery').style.display = 'block';
-//     })
-// }
-
-// function closePrizeDraw() {
-//     document.getElementById('lottery').style.display = 'none';
-//     closeBlackboard();
-// }
-//
-// function drawPrize() {
-//     if (prizeDrawing){
-//         prizeDrawing = false;
-//         clearInterval(prizeInterval);
-//     } else {
-//         prizeDrawing = true;
-//         setPrizeInterval();
-//     }
-// }
-
-//
-// function setPrizeInterval(){
-//     let userListLength = userList.length;
-//     let waitMS = 50;
-//     prizeInterval = setInterval(function (){
-//         let id = getRandomInt(0, userListLength - 1);
-//         document.getElementById('prizeRegCode').innerHTML = userList[id].regCode.toString();
-//         document.getElementById('prizeNickname').innerHTML = userList[id].nickname.toString();
-//     }, waitMS);
-// }
 let blackboardController = new BlackBoardController();
 
 class QuestionDisplay {
@@ -133,7 +95,7 @@ class QuestionDisplay {
         this.answerIdPrefix = 'answer';
         this.countdownId = 'countdown';
         this.questionId = 'question-div';
-        this.rankingId = 'ranking-table';
+        this.rankingId = 'standing';
 
         this.problemDiv = document.getElementById(this.problemId);
         this.answerDivs = [];
@@ -183,13 +145,13 @@ class QuestionDisplay {
         }
         this.updateCountdown(timeLeft)
     }
+
     updateCountdown(timeLeft) {
         this.countdownDiv.innerHTML = timeLeft
     }
 
     static async displayRanking(){
         const questionResult = await getJSON(questionResultUrl);
-        // getJSON(questionResultUrl, function (questionResult) {
         document.getElementById('standing').style.display = 'block';
         for (let userResult of questionResult){
             let thArray = [];
@@ -204,9 +166,8 @@ class QuestionDisplay {
             for (let el of thArray){
                 trDiv.appendChild(el);
             }
-            document.getElementById('ranking-table').appendChild(trDiv);
+            document.getElementById('standing-table').appendChild(trDiv);
         }
-        // })
     }
 
     end(){

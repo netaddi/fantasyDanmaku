@@ -7,8 +7,6 @@ const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 let connected;
 
-const impressController = impress();
-
 class KeywordFilter{
     constructor() {
         this.bannedKeywordList = [];
@@ -48,9 +46,35 @@ class DanmakuRail{
 
 }
 
+class PlaybackController{
 
-let rails = new DanmakuRail();
-let keywordFilter = new KeywordFilter();
+    static getActiveVideoDom(){
+        const activeDom = document.getElementsByClassName('active')[0].children[0];
+        if (activeDom.tagName === 'VIDEO') {
+            return activeDom
+        } else {
+            return null
+        }
+    }
+
+    static play() {
+        const videoDom = this.getActiveVideoDom();
+        if (videoDom){
+            videoDom.play();
+        }
+    }
+    
+    static pause() {
+        const videoDom = this.getActiveVideoDom();
+        if (videoDom){
+            videoDom.pause();
+        }
+    }
+}
+
+const rails = new DanmakuRail();
+const keywordFilter = new KeywordFilter();
+const impressController = impress();
 
 
 async function processAdminCommand(operation, parameter) {
@@ -61,8 +85,11 @@ async function processAdminCommand(operation, parameter) {
         case "openLottery" :
             await blackboardController.initializePrizeDraw();
             break;
-        case "closeLottery" :
-            blackboardController.closePrizeDraw();
+        case "close" :
+            blackboardController.closeBlackBoard();
+            break;
+        case "openCommentRanking" :
+            await blackboardController.openCommentRanking();
             break;
         case "openLog" :
             displayLog();
@@ -80,6 +107,10 @@ async function processAdminCommand(operation, parameter) {
             impressController.goto(parseInt(parameter));
             break;
         case "play":
+            PlaybackController.play();
+            break;
+        case "pause":
+            PlaybackController.pause();
             break;
         case "refresh":
             location.reload();
@@ -145,8 +176,8 @@ function generateDanmaku(jsonMessage) {
     newHTMLNode.innerHTML = jsonMessage['Text'];
     newHTMLNode.style.left = innerWidth + 'px';
     newHTMLNode.style.fontSize = defaultSize + 'px';
-    if (/#[0-9a-fA-F]{6}/.test(jsonMessage['Color'])){
-        newHTMLNode.style.color = jsonMessage['Color'];
+    if (/[0-9a-fA-F]{6}/.test(jsonMessage['Color'])){
+        newHTMLNode.style.color = '#' + jsonMessage['Color'];
     } else {
         newHTMLNode.style.color = '#FFFFFF';
     }
@@ -188,7 +219,7 @@ function generateSlides() {
     let impressDiv = document.getElementById('impress');
 
     showList.map(
-        function(el){
+        el => {
             let fileType = el.match(/\..+$/)[0];
             let showDiv = document.createElement('div');
             showDiv.setAttribute('class', 'step slide');
@@ -196,12 +227,12 @@ function generateSlides() {
             showDiv.setAttribute('data-y', y.toString());
             showDiv.setAttribute('data-z', z.toString());
             impressDiv.appendChild(showDiv);
-            if (1){
+            if (['.png', '.jpg', '.jpeg'].includes(fileType)) {
                 let imgDiv = document.createElement('img');
                 imgDiv.setAttribute('src', el);
                 showDiv.appendChild(imgDiv);
             }
-            if (['.mp4'].indexOf(fileType) > -1){
+            if (['.mp4'].includes(fileType)) {
                 let videoDiv = document.createElement('video');
                 videoDiv.setAttribute('controls', 'controls');
                 let sourceDiv = document.createElement('source');
@@ -232,10 +263,6 @@ function displayLog() {
 
 function hideLog() {
     logDiv.style.display = 'none';
-}
-
-function clearLog() {
-    logDiv.innerHTML = '';
 }
 
 function printLog(message) {

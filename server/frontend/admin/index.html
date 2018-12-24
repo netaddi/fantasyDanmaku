@@ -26,7 +26,7 @@
         line-height: 64px;
         /*width: 120px;*/
         font-size: 20px;
-        margin-right: 24px;
+        margin-right: 12px;
     }
     .container{
         max-width: 1600px;
@@ -34,6 +34,9 @@
     }
     .a-div{
         /*padding-bottom: 16px;*/
+    }
+    .inline-div {
+        display: inline-block;
     }
 </style>
 <body>
@@ -49,6 +52,10 @@
                 Play
             </a>
             <a class="waves-effect waves-light btn control-btn"
+               onclick="sendText('//admin display pause')">
+                Pause
+            </a>
+            <a class="waves-effect waves-light btn control-btn"
                onclick="sendText('//admin display next')">
                 Next
             </a>
@@ -58,34 +65,42 @@
             <ul id="dropdown" class = "dropdown-content">
             </ul>
             <a class="waves-effect waves-light btn control-btn deep-orange"
-               onclick="sendText('//admin display reset')">Reset</a>
-            <a class="waves-effect waves-light btn control-btn deep-orange"
                onclick="sendText('//admin display refresh')">Refresh</a>
 
         </div>
 
-        <h5>Blackboard Control</h5>
-        <div class="a-div">
+        <div class="a-div inline-div">
+            <h5>Blackboard Control</h5>
             <a class="waves-effect waves-light btn control-btn"
-               onclick="sendText('//admin open log')">Open Log</a>
+               onclick="sendText('//admin open lottery')">Lottery</a>
             <a class="waves-effect waves-light btn control-btn"
-               onclick="sendText('//admin close log')">Close Log</a>
+               onclick="sendText('//admin open ranking')">Ranking</a>
             <a class="waves-effect waves-light btn control-btn"
-               onclick="sendText('//admin open lottery')">Open Lottery</a>
-            <a class="waves-effect waves-light btn control-btn"
-               onclick="sendText('//admin close lottery')">Close Lottery</a>
+               onclick="sendText('//admin close')">Close</a>
         </div>
-        <h5>Question Control</h5>
-        <div class="a-div">
-            <a class="waves-effect waves-light btn control-btn"
+        <div class="a-div inline-div">
+            <h5>Question Answering Control</h5>
+            <a class="waves-effect waves-light btn control-btn blue"
                onclick="sendText('//admin question prepare')">Prepare</a>
-            <a class="waves-effect waves-light btn control-btn"
+            <a class="waves-effect waves-light btn control-btn blue"
                onclick="sendText('//admin question start')">start</a>
-            <a class="waves-effect waves-light btn control-btn"
-               onclick="sendText('//admin question end')">end</a>
-            <a class="waves-effect waves-light btn control-btn"
+            <a class="waves-effect waves-light btn control-btn blue"
                onclick="sendText('//admin question ranking')">ranking</a>
+            <a class="waves-effect waves-light btn control-btn blue"
+               onclick="sendText('//admin question end')">close</a>
         </div>
+
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Content</th>
+                <th scope="col">Nickname</th>
+                <th scope="col">Time</th>
+            </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
 
         <script type="text/javascript">
 

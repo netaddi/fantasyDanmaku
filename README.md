@@ -76,6 +76,5 @@ and finally, run the compiled executable file, and open performance frontend to 
 
 
 TODO:
-- administrator page 
-- statistics
-- color pick up
+- admin page: user comment list, ban user
+- blackboard: display user comment rankings
