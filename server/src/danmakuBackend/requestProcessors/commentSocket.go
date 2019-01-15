@@ -4,17 +4,14 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"danmakuBackend/danmakuLib"
+	"sync"
 	"time"
 )
 
 const WSTokenSendIntervalSecond = 10
 
-//var upgrader = websocket.Upgrader{
-//	ReadBufferSize:  1024,
-//	WriteBufferSize: 1024,
-//}
-
 type FrontStruct struct {
+	mutex sync.Mutex
 	available bool
 	conn *websocket.Conn
 }
@@ -23,22 +20,27 @@ type ConnectedMessage struct {
 	MessageType string
 }
 
-var Frontend = &FrontStruct{false, nil}
+var Frontend = &FrontStruct {
+	available: false,
+	conn: nil }
 var connectionKeepRoutineActivated = false
 
-var lastWSWriteTime int64
-const minimumPingInterval = 5
+//var lastWSWriteTime int64
+//const minimumPingInterval = 5
 
-func updateLastWSWriteTime() {
-	lastWSWriteTime = time.Now().Unix()
-}
+//func updateLastWSWriteTime() {
+//	lastWSWriteTime = time.Now().Unix()
+//}
+//
+//func checkPingSendingCondition() bool {
+//	return time.Now().Unix() - lastWSWriteTime > minimumPingInterval
+//}
 
-func checkPingSendingCondition() bool {
-	return time.Now().Unix() - lastWSWriteTime > minimumPingInterval
-}
-
-func (front FrontStruct)SendMessage(messsage string) {
-	_ = front.conn.WriteMessage(websocket.TextMessage, []byte(messsage))
+func (front FrontStruct)SendMessage(message string) error {
+	front.mutex.Lock()
+	err := front.conn.WriteMessage(websocket.TextMessage, []byte(message))
+	front.mutex.Unlock()
+	return err
 }
 
 func HandleSocket(w http.ResponseWriter, r * http.Request){
@@ -64,11 +66,11 @@ func HandleSocket(w http.ResponseWriter, r * http.Request){
 
 	// infinitely write message to keep connection
 	if !connectionKeepRoutineActivated {
-		connectionKeepRoutineActivated = true
+		//connectionKeepRoutineActivated = true
 		for {
 			connectedMessage := &ConnectedMessage{configs.WSToken}
 			messageString := danmakuLib.GetJSON(connectedMessage)
-			_ = Frontend.conn.WriteMessage(websocket.TextMessage, []byte(messageString))
+			_ = Frontend.SendMessage(messageString)
 			time.Sleep(time.Second * WSTokenSendIntervalSecond)
 		}
 	}

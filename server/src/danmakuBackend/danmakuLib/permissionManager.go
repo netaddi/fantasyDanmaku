@@ -31,6 +31,11 @@ func QueryPermission(userId string) int {
 		dbQuery := fmt.Sprintf("SELECT permission FROM users WHERE reg_code='%s';",
 			userId)
 		rows, err := db.Query(dbQuery)
+		defer rows.Close()
+		if err != nil {
+			println("failed to connect database.")
+			return 1
+		}
 		if rows.Next() {
 			_ = rows.Scan(&permission)
 			permissionMap[userId] = permission

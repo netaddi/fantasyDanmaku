@@ -79,11 +79,28 @@ func CommentHandler(w http.ResponseWriter, r * http.Request){
 
 	stmt, err := db.Prepare("INSERT INTO comments (user, content, time, color) VALUES (?, ?, now(), ?);")
 	defer stmt.Close()
+	if err != nil {
+		println("failed to connect database.")
+		danmakuLib.DenyRequest(w, "failed to connect database.")
+		//db.Close()
+		return
+	}
 	result, err := stmt.Exec(username, comment, color)
+	if err != nil {
+		println("failed to connect database.")
+		danmakuLib.DenyRequest(w, "failed to connect database.")
+		//db.Close()
+		return
+	}
 	affect, err := result.RowsAffected()
 	if affect == 1 {
 		if Frontend.available {
-			Frontend.SendMessage(danmakuLib.GetJSON(danmakuItem))
+			err := Frontend.SendMessage(danmakuLib.GetJSON(danmakuItem))
+			if err != nil {
+				danmakuLib.DenyRequest(w, "failed to connect frontend.")
+				//db.Close()
+				return
+			}
 		}
 		danmakuLib.AcceptRequest(w)
 	} else {

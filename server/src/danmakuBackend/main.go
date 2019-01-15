@@ -28,6 +28,7 @@ func main() {
 	r.HandleFunc("/answer", requestProcessors.ProcessAnswering)
 	r.HandleFunc("/getQuestionResult", requestProcessors.GetQuestionResult)
 	r.HandleFunc("/getCommentRanking", requestProcessors.GetUserCommentRanking)
+	r.HandleFunc("/getRecentComments", requestProcessors.GetRecentCommentList)
 
 	r.PathPrefix("/").Handler(
 		http.StripPrefix("/", http.FileServer(http.Dir("../../frontend/"))))

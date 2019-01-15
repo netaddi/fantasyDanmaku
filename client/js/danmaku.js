@@ -220,7 +220,7 @@ function generateSlides() {
 
     showList.map(
         el => {
-            let fileType = el.match(/\..+$/)[0];
+            let fileType = el.match(/\..{3}$/)[0];
             let showDiv = document.createElement('div');
             showDiv.setAttribute('class', 'step slide');
             showDiv.setAttribute('data-x', x.toString());
@@ -232,7 +232,7 @@ function generateSlides() {
                 imgDiv.setAttribute('src', el);
                 showDiv.appendChild(imgDiv);
             }
-            if (['.mp4'].includes(fileType)) {
+            if (['.mp4', '.flv'].includes(fileType)) {
                 let videoDiv = document.createElement('video');
                 videoDiv.setAttribute('controls', 'controls');
                 let sourceDiv = document.createElement('source');

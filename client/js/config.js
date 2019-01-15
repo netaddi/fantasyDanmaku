@@ -1,4 +1,4 @@
-const server = 'localhost';
+const server = '127.0.0.1';
 const port = '8081';
 
 
