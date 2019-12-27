@@ -63,7 +63,7 @@ export GOPATH=`pwd`
 ```
 at the root dir of the project.
 
-Then, go to `/src/danmakuBackend` folder, and run these commands:
+Then, go to `src/danmakuBackend` folder, and run these commands:
 ```
 go get github.com/go-sql-driver/mysql
 go get github.com/gorilla/mux
@@ -74,7 +74,16 @@ go build
 
 and finally, run the compiled executable file, and open performance frontend to connect.
 
+### RegEx for matching problem
+`(.+?)\s+.+\-.+\n(.+)\s(.+)\s(.+)\s(.+)\n(.)`
+into 
+`('$1', '$2', '$3', '$4', '$5', '$6'),`
 
 TODO:
 - admin page: user comment list, ban user
 - blackboard: display user comment rankings
+
+temp command
+```
+PlaybackController.play()
+```

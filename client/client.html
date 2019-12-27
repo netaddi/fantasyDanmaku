@@ -6,11 +6,15 @@
     <link href="css/comment.css" rel="stylesheet">
     <link href="css/blackboard.css" rel="stylesheet">
     <link href="css/showFront.css" rel="stylesheet">
-
+    <style type="text/css">
+        h4{
+            font-size: 48px;
+        }
+    </style>
 </head>
 <body>
     <div id="show">
-        <div id="impress">
+        <div id="impress" data-transition-duration="0">
         </div>
     </div>
     <div id="log" class="log"></div>
@@ -19,16 +23,14 @@
         <div id="board" class="board">
             <div id="lottery" class="lottery">
                 <h2>抽奖环节</h2>
-                <table style="width:100%">
+                <table style="width:100%; table-layout: fixed">
                     <tr>
                         <th>门票邀请码</th>
-                        <th id="prizeRegCode"></th>
-                        <th></th>
+                        <th>昵称</th>
                     </tr>
                     <tr>
-                        <th>昵称</th>
+                        <th id="prizeRegCode"></th>
                         <th id="prizeNickname"></th>
-                        <th></th>
                     </tr>
                 </table>
                 <a class="btn" onclick="blackboardController.drawPrize()">抽奖</a>
@@ -44,7 +46,7 @@
             </div>
 
             <div id="standing" class="standing">
-                <h4 class="ranking">Top 10 ranking!</h4>
+                <h4 class="ranking">Top ranking!</h4>
                 <div class="ranking-div">
                     <table style="width:100%" id="standing-table">
                         <tr>
@@ -81,6 +83,7 @@
 
             showInit();
             impressController.init();
+            PlaybackController.play();
 
             let wsConnection = new WebSocket(config.wsUrl);
 

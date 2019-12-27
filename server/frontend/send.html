@@ -26,7 +26,7 @@
         padding-top: 8%;
     }
     .btn{
-        margin-left: 35%;
+        margin-left: 12%;
     }
 </style>
 
@@ -59,6 +59,21 @@
             error: {}
         });
     }
+    function tryAnswer(option){
+        $.ajax({
+            type: "GET",
+            url: '/tryAnswer',
+            success: function (response) {
+                response = JSON.parse(response);
+                if (response.accepted) {
+                    window.location.href = "/answer.html";
+                } else {
+                    Materialize.toast("答题还没开始或已经结束，点我也没用哦！", 1500)
+                }
+            },
+            error: {}
+        });
+    }
 </script>
 <div class="container">
     <div class="reg">
@@ -81,7 +96,8 @@
             </div>
         </form>
     </div>
-    <a class="waves-effect waves-light btn" onclick="submitSend()">发射！</a>
+    <a class="waves-effect waves-light btn" onclick="submitSend()">发射</a>
+    <a class="waves-effect waves-light btn" onclick="tryAnswer()">答题</a>
 </div>
 
 

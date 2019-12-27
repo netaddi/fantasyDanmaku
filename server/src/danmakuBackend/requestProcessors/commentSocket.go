@@ -1,9 +1,9 @@
 package requestProcessors
 
 import (
+	"danmakuBackend/danmakuLib"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"danmakuBackend/danmakuLib"
 	"sync"
 	"time"
 )
@@ -66,7 +66,7 @@ func HandleSocket(w http.ResponseWriter, r * http.Request){
 
 	// infinitely write message to keep connection
 	if !connectionKeepRoutineActivated {
-		//connectionKeepRoutineActivated = true
+		connectionKeepRoutineActivated = true
 		for {
 			connectedMessage := &ConnectedMessage{configs.WSToken}
 			messageString := danmakuLib.GetJSON(connectedMessage)

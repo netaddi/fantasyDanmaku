@@ -26,7 +26,6 @@ func RegHandler(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		println("failed to connect database.")
 		danmakuLib.DenyRequest(w, "failed to connect database")
-		db.Close()
 		return
 	}
 	defer db.Close()
@@ -38,7 +37,7 @@ func RegHandler(w http.ResponseWriter, r *http.Request){
 		//db.Close()
 		return
 	}
-
+	defer rows.Close()
 
 	if rows.Next() {
 		repeatQuery := fmt.Sprintf("SELECT * FROM users WHERE nickname='%s'", r.Form.Get("nickname"))

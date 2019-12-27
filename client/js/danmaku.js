@@ -1,7 +1,15 @@
 
+const speed = 3.2;
+const danmakuMoveInterval = 25;  // ms
+const defaultSize = 56;
+const maxDanmakuRailCount = 16;
+const continuousDanmakuWaitTime = 512;  // ms
+
 const danmakuDivId = 'danmaku';
 const logDivId = 'log';
 const logDiv = document.getElementById(logDivId);
+const danmakuDiv = document.getElementById(danmakuDivId);
+
 
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
@@ -23,25 +31,85 @@ class KeywordFilter{
     }
 }
 
-class DanmakuRail{
+const keywordFilter = new KeywordFilter();
+
+function moveDanmaku(danmakuItem, rail){
+    const freeLength = window.innerWidth / 10 ;
+    const totalLength = window.innerWidth + danmakuItem.offsetWidth;
+    let freeRailMoveLength = danmakuItem.offsetWidth + freeLength;
+    let movedLength = 0;
+    let railFreed = false;
+    let startPosition = danmakuItem.getBoundingClientRect().left;
+    let timer = setInterval(function () {
+        movedLength += speed;
+        // if (movedLength > 100 ) return;
+        danmakuItem.style.left = (startPosition - movedLength).toString() + 'px';
+        // danmakuItem.style.transform = 'translateX(-' + movedLength + 'px)';
+        if(!railFreed && movedLength > freeRailMoveLength){
+            railFreed = true;
+            danmakuController.releaseRail(rail)
+        }
+        if(movedLength > totalLength){
+            clearInterval(timer);
+            danmakuItem.remove();
+        }
+    }, danmakuMoveInterval);
+}
+
+
+class DanmakuController{
     constructor() {
-        this.rails = [0];
+        this.rails = Array(maxDanmakuRailCount).fill(false);
+        this.danmakuQueue = [];
     }
 
-    pushIntoRail(){
-        let i = 0;
-        for (; i < this.rails.length; i++){
+    generateDanmaku(jsonMessage, thisRail) {
+        let newHTMLNode = document.createElement("div");
+        newHTMLNode.classList.add("comment");
+        newHTMLNode.innerHTML = jsonMessage['Text'];
+        newHTMLNode.style.left = innerWidth + 'px';
+        newHTMLNode.style.fontSize = defaultSize + 'px';
+        if (/[0-9a-fA-F]{6}/.test(jsonMessage['Color'])){
+            newHTMLNode.style.color = '#' + jsonMessage['Color'];
+        } else {
+            newHTMLNode.style.color = '#FFFFFF';
+        }
+        newHTMLNode.style.top = defaultSize * thisRail + 'px';
+        danmakuDiv.appendChild(newHTMLNode);
+        moveDanmaku(newHTMLNode, thisRail);
+    }
+
+    processDanmaku(jsonMessage) {
+        if (keywordFilter.checkCommentBanned(jsonMessage)){
+            return;
+        }
+        const rail = this.getAvailableRail();
+        if (rail > -1) {
+            this.generateDanmaku(jsonMessage, rail);
+        } else {
+            this.danmakuQueue.push(jsonMessage);
+        }
+    }
+
+    getAvailableRail(){
+        for (let i = 0; i < maxDanmakuRailCount; i++){
             if (!this.rails[i]){
-                this.rails[i] = 1;
+                this.rails[i] = true;
                 return i;
             }
         }
-        this.rails.push(1);
-        return i;
+        // no rail available. push the danmaku into buffer.
+        return -1;
     }
 
     releaseRail(rail) {
-        this.rails[rail] = 0;
+        if (this.danmakuQueue.length) {
+            setTimeout(() => {
+                this.generateDanmaku(this.danmakuQueue.shift(), rail);
+            }, continuousDanmakuWaitTime);
+        } else {
+            this.rails[rail] = false;
+        }
     }
 
 }
@@ -50,6 +118,7 @@ class PlaybackController{
 
     static getActiveVideoDom(){
         const activeDom = document.getElementsByClassName('active')[0].children[0];
+        console.log(activeDom);
         if (activeDom.tagName === 'VIDEO') {
             return activeDom
         } else {
@@ -59,6 +128,7 @@ class PlaybackController{
 
     static play() {
         const videoDom = this.getActiveVideoDom();
+        console.log(videoDom);
         if (videoDom){
             videoDom.play();
         }
@@ -72,10 +142,22 @@ class PlaybackController{
     }
 }
 
-const rails = new DanmakuRail();
-const keywordFilter = new KeywordFilter();
+const danmakuController = new DanmakuController();
 const impressController = impress();
 
+
+function generateTestDanmaku(text) {
+    danmakuController.processDanmaku({
+        'Text': text,
+        'Color': 'FFFFFF'
+    });
+}
+
+function generateMultipleTestDanmaku(text, count) {
+    for (let i = 0; i < count; i ++) {
+        generateTestDanmaku(text);
+    }
+}
 
 async function processAdminCommand(operation, parameter) {
     switch (operation) {
@@ -102,6 +184,7 @@ async function processAdminCommand(operation, parameter) {
             break;
         case "next":
             impressController.next();
+            PlaybackController.play();
             break;
         case "goto":
             impressController.goto(parseInt(parameter));
@@ -133,60 +216,13 @@ async function processWSMessage(message){
             await processAdminCommand(jsonMessage.AdminOperation, jsonMessage.OperationParameter);
             return;
         case "danmaku":
-            generateDanmaku(jsonMessage);
+            danmakuController.processDanmaku(jsonMessage);
             return;
         case "question":
             questionDisplaying.processMessage(jsonMessage);
             return;
     }
 
-}
-
-function moveDanmaku(danmakuItem, rail){
-    const freeLength = window.innerWidth / 10 ;
-    const totalLength = window.innerWidth + danmakuItem.offsetWidth;
-    let freeRailMoveLength = danmakuItem.offsetWidth + freeLength;
-    let movedLength = 0;
-    let railFreed = false;
-    let timer = setInterval(function () {
-        movedLength += speed;
-        danmakuItem.style.transform = 'translateX(-' + movedLength + 'px)';
-        if(!railFreed && movedLength > freeRailMoveLength){
-            railFreed = true;
-            // releaseRail(rail);
-            rails.releaseRail(rail)
-        }
-        if(movedLength > totalLength){
-            clearInterval(timer);
-            danmakuItem.remove();
-        }
-    }, 10);
-
-}
-
-function generateDanmaku(jsonMessage) {
-    let danmakuDiv = document.getElementById(danmakuDivId);
-    let newHTMLNode = document.createElement("div");
-
-    if (keywordFilter.checkCommentBanned(jsonMessage['Text'])) {
-        return;
-    }
-
-    newHTMLNode.classList.add("comment");
-    newHTMLNode.innerHTML = jsonMessage['Text'];
-    newHTMLNode.style.left = innerWidth + 'px';
-    newHTMLNode.style.fontSize = defaultSize + 'px';
-    if (/[0-9a-fA-F]{6}/.test(jsonMessage['Color'])){
-        newHTMLNode.style.color = '#' + jsonMessage['Color'];
-    } else {
-        newHTMLNode.style.color = '#FFFFFF';
-    }
-
-    // let thisRail = pushIntoRail();
-    let thisRail = rails.pushIntoRail();
-    newHTMLNode.style.top = defaultSize * thisRail + 'px';
-    danmakuDiv.appendChild(newHTMLNode);
-    moveDanmaku(newHTMLNode, thisRail);
 }
 
 
@@ -199,8 +235,7 @@ function objectMap(obj, call){
 
 function configConnection(conn) {
     conn.onclose = function (evt) {
-        printLog("connection closed.");
-        alert("connection closed.");
+        printLog("connection closed. Reconnection");
         conn = new WebSocket(config.wsUrl);
         configConnection(conn);
     };
@@ -227,7 +262,7 @@ function generateSlides() {
             showDiv.setAttribute('data-y', y.toString());
             showDiv.setAttribute('data-z', z.toString());
             impressDiv.appendChild(showDiv);
-            if (['.png', '.jpg', '.jpeg'].includes(fileType)) {
+            if (['.png', '.JPG', '.PNG', '.jpg', '.jpeg'].includes(fileType)) {
                 let imgDiv = document.createElement('img');
                 imgDiv.setAttribute('src', el);
                 showDiv.appendChild(imgDiv);
@@ -269,4 +304,5 @@ function printLog(message) {
     let item = document.createElement("div");
     item.innerHTML = message;
     logDiv.appendChild(item);
+    console.log(message)
 }

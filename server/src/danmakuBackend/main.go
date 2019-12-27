@@ -26,6 +26,7 @@ func main() {
 	r.HandleFunc("/ws", requestProcessors.HandleSocket)
 	r.HandleFunc("/getUserList", requestProcessors.GetUserList)
 	r.HandleFunc("/answer", requestProcessors.ProcessAnswering)
+	r.HandleFunc("/tryAnswer", requestProcessors.GetAnswerStarted)
 	r.HandleFunc("/getQuestionResult", requestProcessors.GetQuestionResult)
 	r.HandleFunc("/getCommentRanking", requestProcessors.GetUserCommentRanking)
 	r.HandleFunc("/getRecentComments", requestProcessors.GetRecentCommentList)

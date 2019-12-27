@@ -36,13 +36,12 @@ func LoginHandler(w http.ResponseWriter, r * http.Request) {
 	dbQuery := fmt.Sprintf("SELECT reg_code, permission FROM users WHERE reg_code='%s' AND password=md5('%s');",
 									r.Form.Get("regCode"), r.Form.Get("password"))
 	rows, err := db.Query(dbQuery)
-	defer rows.Close()
-
 	if err != nil {
 		println("failed to query database.: ", err.Error())
 		danmakuLib.DenyRequest(w, "failed to query database.")
 		return
 	}
+	defer rows.Close()
 	defer db.Close()
 
 	if rows.Next() {

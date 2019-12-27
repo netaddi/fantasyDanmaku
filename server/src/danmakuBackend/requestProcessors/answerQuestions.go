@@ -67,6 +67,7 @@ var currentProblemId int
 var currentProblemIndex int
 var currentProblemStartTime int64
 var answeringStarted bool
+var answeringPrepared bool
 //var answerRecord map[string]bool
 var answerRecords sync.Map
 var questionInitialized = false
@@ -107,6 +108,7 @@ func InitializeProblemSet(){
 
 func prepareAnswering(){
 	answeringStarted = false
+	answeringPrepared = true
 	//answerRecord = make(map[string]bool)
 	InitializeProblemSet()
 	initializeMessage := &QuestionBasicOperation{
@@ -176,7 +178,7 @@ func startAnswering(){
 
 	dumpAnswerRecords(answerRecords)
 
-	answeringStarted = false
+	answeringPrepared = false
 	endMessage.Question = "数据记录完成！"
 	Frontend.SendMessage(danmakuLib.GetJSON(endMessage))
 
@@ -207,6 +209,14 @@ func dumpAnswerRecords(answerRecords sync.Map) {
 
 		return true
 	})
+}
+
+func GetAnswerStarted(w http.ResponseWriter, r * http.Request){
+	if answeringPrepared {
+		danmakuLib.AcceptRequest(w)
+	} else {
+		danmakuLib.DenyRequest(w, "")
+	}
 }
 
 func ProcessAnswering(w http.ResponseWriter, r * http.Request){
