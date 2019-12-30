@@ -153,7 +153,9 @@ class QuestionDisplay {
     static async displayRanking(){
         const questionResult = await getJSON(questionResultUrl);
         document.getElementById('standing').style.display = 'block';
-        questionResult.length = 20;
+        if (questionResult.length > 20) {
+            questionResult.length = 20;
+        }
         for (let userResult of questionResult){
             let thArray = [];
             let trDiv = document.createElement('tr');

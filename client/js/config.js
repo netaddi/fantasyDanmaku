@@ -1,5 +1,5 @@
-const server = '127.0.0.1';
-const port = '8081';
+const server = 'db.zjufantasy.club';
+const port = '8082';
 
 
 // const wsUrl = 'ws://' + server + ':' + port + '/ws';
@@ -20,6 +20,3 @@ const config = {
 // use this token as a signal of successfully connected websocket.
 // have to be the same as the one on server side.
 const wsToken = '__Danmaku_WS_Connected_Token___';
-const speed = 1;
-const defaultSize = 48;
-const danmakuLineContiueThreshold = 80;

@@ -1,15 +1,14 @@
 
 const speed = 3.2;
 const danmakuMoveInterval = 25;  // ms
-const defaultSize = 56;
-const maxDanmakuRailCount = 16;
+const defaultSize = 64;
+const maxDanmakuRailCount = 12;
 const continuousDanmakuWaitTime = 512;  // ms
 
 const danmakuDivId = 'danmaku';
 const logDivId = 'log';
 const logDiv = document.getElementById(logDivId);
 const danmakuDiv = document.getElementById(danmakuDivId);
-
 
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
@@ -63,7 +62,12 @@ class DanmakuController{
         this.danmakuQueue = [];
     }
 
+
+
     generateDanmaku(jsonMessage, thisRail) {
+        if (!jsonMessage) {
+            return;
+        }
         let newHTMLNode = document.createElement("div");
         newHTMLNode.classList.add("comment");
         newHTMLNode.innerHTML = jsonMessage['Text'];
@@ -105,7 +109,10 @@ class DanmakuController{
     releaseRail(rail) {
         if (this.danmakuQueue.length) {
             setTimeout(() => {
-                this.generateDanmaku(this.danmakuQueue.shift(), rail);
+                console.log("buffer: ", this.danmakuQueue);
+                const cachedDanmaku = this.danmakuQueue.shift();
+                console.log("reading buffer", cachedDanmaku);
+                this.generateDanmaku(cachedDanmaku, rail);
             }, continuousDanmakuWaitTime);
         } else {
             this.rails[rail] = false;
@@ -255,6 +262,7 @@ function generateSlides() {
 
     showList.map(
         el => {
+            console.log(el);
             let fileType = el.match(/\..{3}$/)[0];
             let showDiv = document.createElement('div');
             showDiv.setAttribute('class', 'step slide');
