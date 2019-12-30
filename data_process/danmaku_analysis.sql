@@ -1,11 +1,14 @@
 
 use danmaku;
 
-select * from comments order by time desc ;
+select users.nickname, content, time, color from comments
+    left join users
+        on comments.user = users.reg_code;
+
 
 select *
 from users
-where enrolled = 1 and nickname like '%巴%';
+where enrolled = 1 and nickname like '%%';
 
 
 select nickname, count(nickname)
@@ -16,25 +19,28 @@ where nickname != ''
 group by nickname
 order by count(nickname) desc;
 
-select nickname, count(nickname)
+select citer_user.nickname, cited_user.nickname, count(*)
 from comments
-  inner join users
+  inner join users as cited_user
     on content
-      like concat('%', users.nickname, '%')
-group by nickname;
+      like concat('%', cited_user.nickname, '%')
+  left join users as citer_user
+    on citer_user.reg_code = comments.user
+group by cited_user.nickname, citer_user.nickname;
 
-
-select content, nickname, time, color
-from comments
-  left join users
-    on comments.user = users.reg_code
-where nickname = '无敌高_神';
+delete from users where nickname = '';
 
 select content, nickname, time, color
 from comments
   left join users
     on comments.user = users.reg_code
-where content like '%林渊%';
+where nickname = '';
+
+select content, nickname, time, color
+from comments
+  left join users
+    on comments.user = users.reg_code
+where content like '%%';
 
 
 # answer ranking
@@ -56,10 +62,21 @@ FROM user_answer
     ON user_answer.question_id = problem_set.id
   LEFT JOIN users
     ON user_answer.user_id = users.reg_code
-WHERE nickname = '上帝';
+WHERE nickname = '';
 
 # question correct answer rate ranking
-SELECT question, answer1, answer2, answer3, answer4, answer, count(*) / total_answer_count, count(*), total_answer_count
+SELECT question                                                          as 题目,
+       answer1                                                           as A,
+       count(IF(answer = 'A', 1, null)) / total_answer_count             as A选择率,
+       answer2                                                           as B,
+       count(IF(answer = 'B', 1, null)) / total_answer_count             as B选择率,
+       answer3                                                           as C,
+       count(IF(answer = 'C', 1, null)) / total_answer_count             as C选择率,
+       answer4                                                           as D,
+       count(IF(answer = 'D', 1, null)) / total_answer_count             as D选择率,
+       correct_answer                                                    as 答案,
+       count(IF(answer = correct_answer, 1, null)) / total_answer_count  as 正答率,
+       total_answer_count                                                as 作答人数
 FROM user_answer
   LEFT OUTER JOIN problem_set
     ON user_answer.question_id = problem_set.id
@@ -73,19 +90,18 @@ FROM user_answer
     GROUP BY problem_set.id
   ) total_answer_table
     ON user_answer.question_id = total_answer_table.id
-WHERE user_answer.answer = problem_set.correct_answer
-GROUP BY problem_set.id, total_answer_count;
+GROUP BY problem_set.id;
 
 
 
 # incorrect option ranking
-SELECT question, count(answer), answer,
+SELECT question as 问题, count(answer) as 错答人数, answer as 错答选项,
        CASE
          WHEN answer = 'A' THEN answer1
          WHEN answer = 'B' THEN answer2
          WHEN answer = 'C' THEN answer3
          WHEN answer = 'D' THEN answer4
-       END as term
+       END as 选项内容
 FROM user_answer
   LEFT OUTER JOIN problem_set
     ON user_answer.question_id = problem_set.id
