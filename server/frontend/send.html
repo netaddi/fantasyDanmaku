@@ -32,6 +32,8 @@
 
 
 <script>
+
+    let sending = false;
     function captureKey(event) {
         // capture enter
         if (event.keyCode === 13) {
@@ -41,6 +43,10 @@
     }
 
     function submitSend(){
+        if (sending) {
+            return;
+        }
+        sending = true;
         $.ajax({
             type: "POST",
             url: '/send',
@@ -54,9 +60,11 @@
                 } else {
                     Materialize.toast(response.errMessage, 2000)
                 }
-
+                sending = false;
             },
-            error: {}
+            error: function() {
+                sending = false;
+            }
         });
     }
     function tryAnswer(option){
@@ -96,7 +104,7 @@
             </div>
         </form>
     </div>
-    <a class="waves-effect waves-light btn" onclick="submitSend()">发射</a>
+    <a class="waves-effect waves-light btn" id="send-btn" onclick="submitSend()">发射</a>
     <a class="waves-effect waves-light btn" onclick="tryAnswer()">答题</a>
 </div>
 

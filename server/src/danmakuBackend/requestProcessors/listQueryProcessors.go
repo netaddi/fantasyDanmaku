@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func GetUserList(w http.ResponseWriter, r * http.Request) {
+func GetUserList(w http.ResponseWriter, r *http.Request) {
 	danmakuLib.LogHTTPRequest(r)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -22,7 +22,7 @@ func GetUserList(w http.ResponseWriter, r * http.Request) {
 	userList := make([]map[string]interface{}, 0)
 	var regCode string
 	var nickname string
-	for rows.Next(){
+	for rows.Next() {
 		_ = rows.Scan(&regCode, &nickname)
 		userInfo := make(map[string]interface{})
 		userInfo["regCode"] = regCode
@@ -33,7 +33,7 @@ func GetUserList(w http.ResponseWriter, r * http.Request) {
 	_, _ = io.WriteString(w, string(jsonData))
 }
 
-func GetRecentCommentList(w http.ResponseWriter, r * http.Request) {
+func GetRecentCommentList(w http.ResponseWriter, r *http.Request) {
 	danmakuLib.LogHTTPRequest(r)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -51,12 +51,16 @@ func GetRecentCommentList(w http.ResponseWriter, r * http.Request) {
 	rows, _ := db.Query(dbQuery)
 	defer rows.Close()
 	userList := make([]map[string]interface{}, 0)
-	var count string
+	var content string
+	var sendTime string
 	var nickname string
-	for rows.Next(){
-		_ = rows.Scan(&count, &nickname)
+	var regCode string
+	for rows.Next() {
+		_ = rows.Scan(&content, &sendTime, &nickname, &regCode)
 		userInfo := make(map[string]interface{})
-		userInfo["count"] = count
+		userInfo["content"] = content
+		userInfo["time"] = sendTime
+		userInfo["reg"] = regCode
 		userInfo["nickname"] = nickname
 		userList = append(userList, userInfo)
 	}
@@ -65,7 +69,7 @@ func GetRecentCommentList(w http.ResponseWriter, r * http.Request) {
 
 }
 
-func GetUserCommentRanking(w http.ResponseWriter, r * http.Request) {
+func GetUserCommentRanking(w http.ResponseWriter, r *http.Request) {
 	danmakuLib.LogHTTPRequest(r)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -86,7 +90,7 @@ func GetUserCommentRanking(w http.ResponseWriter, r * http.Request) {
 	userList := make([]map[string]interface{}, 0)
 	var count string
 	var nickname string
-	for rows.Next(){
+	for rows.Next() {
 		_ = rows.Scan(&count, &nickname)
 		userInfo := make(map[string]interface{})
 		userInfo["count"] = count

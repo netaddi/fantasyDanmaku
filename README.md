@@ -75,8 +75,8 @@ go build
 and finally, run the compiled executable file, and open performance frontend to connect.
 
 ### RegEx for matching problem
-`(.+?)\s+.+\-.+\n(.+)\s(.+)\s(.+)\s(.+)\n(.)`
-into 
+`(.+?)\s?.+\n(.+)\s(.+)\s(.+)\s(.+)\n(.)`
+into
 `('$1', '$2', '$3', '$4', '$5', '$6'),`
 
 TODO:

@@ -95,10 +95,18 @@
             <tr>
                 <th scope="col">Content</th>
                 <th scope="col">Nickname</th>
+                <th scope="col">Reg Code</th>
                 <th scope="col">Time</th>
             </tr>
             </thead>
             <tbody id="table-body">
+                <tr>
+                    <td>Jill</td>
+                    <td>Smith</td>
+                    <td>50</td>
+                    <td>50</td>
+                    <td>50</td>
+                  </tr>
             </tbody>
         </table>
 
@@ -110,12 +118,26 @@
 </body>
 <script type="text/javascript">
     const gotoListLength = 30;
+    function loadCommentList() {
+        $.ajax({
+            type: "GET",
+            url: "/getRecentComments",
+            success: function (commentList) {
+                console.log(commentList);
+                let tableDiv = document.getElementById('table-body')
+                commentList.forEach(commentInfo => {
+                    console.log(commentInfo);
+                })
+            }
+        });
+    }
     window.onload = function () {
         const dropdownDom = document.getElementById('dropdown');
         [...Array(gotoListLength).keys()].forEach(id => {
             dropdownDom.innerHTML +=
                 `<li><a onclick="sendText('//admin display goto ${id}')">${id}</a></li>`
-        })
+        });
+        loadCommentList();
     };
     function sendText(text){
         $.ajax({
